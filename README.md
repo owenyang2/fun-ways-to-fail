@@ -1,0 +1,2 @@
+# fun ways to die
+ 
