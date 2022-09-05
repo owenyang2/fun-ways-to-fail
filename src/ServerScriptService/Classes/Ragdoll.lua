@@ -17,13 +17,15 @@ local sockets = { -- UpperAngle, TwistLowerAngle, TwistUpperAngle and MaxFrictio
 	[{"Neck"}] = {60, -75, 60, 10},
 	[{"RightShoulder", "LeftShoulder"}] = {45, -90, 150},
 	[{"Waist"}] = {30, -55, 25},
-	[{"LeftHip", "RightHip"}] = {50, 100, -45},
+	--[{"LeftHip", "RightHip"}] = {50, 100, -45},
+	[{"LeftHip", "RightHip"}] = {90, -180, 180},
 }
 
 local function findReplacementJoint(targetMotor)
 	for motors, properties in pairs(hinges) do
 		if table.find(motors, targetMotor) then
 			local hinge = Instance.new("HingeConstraint")
+			hinge.Name = targetMotor
 			hinge.LimitsEnabled = true
 			
 			hinge.LowerAngle = properties[1]
@@ -36,8 +38,9 @@ local function findReplacementJoint(targetMotor)
 	for motors, properties in pairs(sockets) do
 		if table.find(motors, targetMotor) then
 			local socket = Instance.new("BallSocketConstraint")
-			socket.LimitsEnabled = true
-			socket.TwistLimitsEnabled = true
+			socket.Name = targetMotor
+			--socket.LimitsEnabled = true
+			--socket.TwistLimitsEnabled = true
 			
 			socket.UpperAngle = properties[1]
 			socket.TwistLowerAngle = properties[2]
@@ -80,8 +83,8 @@ function Ragdoll:CreateJoints()
 			table.remove(self.Motor6DJoints, table.find(self.Motor6DJoints, motor))
 		end)
 		
-		ragdollJoint.Attachment0 = createAtt("RagdollAtt", motor.C0, motor.Part0)
-		ragdollJoint.Attachment1 = createAtt("RagdollAtt", motor.C1, motor.Part1)			
+		ragdollJoint.Attachment0 = createAtt("RagdollAtt0", motor.C0, motor.Part0)
+		ragdollJoint.Attachment1 = createAtt("RagdollAtt1", motor.C1, motor.Part1)			
 		ragdollJoint.Parent = jointFolder
 		ragdollJoint.Enabled = false
 		
@@ -97,8 +100,10 @@ function Ragdoll:Toggle(enable)
 
 	local chr = self.Player.Character
 
-	if not chr or self.Ragdolled then return end
+	if not chr then return end
 	
+	enable = if enable ~= nil then enable else not self.Ragdolled
+
 	self.Ragdolled = enable
 	
 	self.Player.Character.HumanoidRootPart.CanCollide = not enable
@@ -111,8 +116,37 @@ function Ragdoll:Toggle(enable)
 	for _, ragdollJoint in ipairs(self.RagdollJoints) do
 		ragdollJoint.Enabled = enable
 	end
+
+	if enable then
+		self._vfTrove:Clean()
+
+		local vfLeft = Instance.new("VectorForce")
+		vfLeft.Attachment0 = chr.LeftUpperLeg.RagdollAtt0
+		vfLeft.Force = Vector3.new(-500, 0, 0)
+		vfLeft.Parent = chr.LeftUpperLeg
+		self._vfTrove:Add(vfLeft)
+	
+		local vfRight = Instance.new("VectorForce")
+		vfRight.Attachment0 = chr.RightUpperLeg.RagdollAtt0
+		vfRight.Force = Vector3.new(500, 0, 0)
+		vfRight.Parent = chr.RightUpperLeg
+		self._vfTrove:Add(vfRight)
+	
+		task.delay(1, function()
+			self._vfTrove:Remove(vfLeft)
+			self._vfTrove:Remove(vfRight)
+		end)	
+	end
+
+	--[[
+	task.delay(1, function()
+		chr.LeftUpperLeg.CFrame *= CFrame.Angles(0, math.rad(180), 0)
+		chr.RightUpperLeg.CFrame *= CFrame.Angles(0, math.rad(180), 0)	
+	end)
+	--]]
 end
 
+--[[
 function Ragdoll:Enable()
 	self:Toggle(true)	
 end
@@ -120,20 +154,20 @@ end
 function Ragdoll:Disable()
 	self:Toggle(false)	
 end
+--]]
 
 function Ragdoll:Destroy()
-	self:Disable()
+	self:Toggle(false)
 	self._trove:Destroy() -- clean up on death connections
 	Ragdoll.GlobalRagdolls[self.Player] = nil
 end
 
 function Ragdoll:Setup()
-	self:CreateJoints()
-
 	self._trove:Connect(self.Player.CharacterAdded, function(chr) -- should be disconnected when cleaned up
+		self:CreateJoints()
 		chr.Humanoid.BreakJointsOnDeath = false
 		self._trove:Connect(chr.Humanoid.Died, function() -- setup ragdoll on death
-			self:Enable()
+			self:Toggle(true)
 		end)
 	end)
 end
@@ -142,11 +176,14 @@ function Ragdoll.new(plr)
 	local newRagdoll = setmetatable({
 		Player = plr,
 		_trove = Trove.new(),
+		_vfTrove = Trove.new(),
 		Ragdolled = false,
 		
 		RagdollJoints = {}, -- ragdoll joints
 		Motor6DJoints = {} -- normal motor6d joints
 	}, Ragdoll)
+
+	Ragdoll.GlobalRagdolls[plr] = newRagdoll
 
 	newRagdoll:Setup()
 

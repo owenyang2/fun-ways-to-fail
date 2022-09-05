@@ -34,8 +34,10 @@ local valueToInstVal = { -- value of data to value instance required to store
 local Profiles = {}
 
 local function createLeaderstatInst(plr, key)
-    local val = Profiles[plr][key]
-        
+    local val = Profiles[plr].Data[key]
+    
+    print(key, Profiles[plr].Data[key])
+
     if val ~= nil then
         local valInst = Instance.new(valueToInstVal[typeof(val)])
         valInst.Name = key
@@ -65,7 +67,7 @@ local function onDataUpdate(plr, key)
         return
     end
 
-    valInst.Value = Profiles[plr][key]
+    valInst.Value = Profiles[plr].Data[key]
 end
 
 local function DeepCopyTable(t)
@@ -182,3 +184,5 @@ function ProfileManager:InsertData(plr, key, val)
 
     self:WriteData(plr, key, tCopy)
 end
+
+return ProfileManager
