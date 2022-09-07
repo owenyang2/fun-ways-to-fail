@@ -118,6 +118,7 @@ function Ragdoll:Toggle(enable)
 	end
 
 	if enable then
+		-- legs tended to remain stuck together, so seperate them using force for better vfx (or maybe try using the motor6ds in the future)
 		self._vfTrove:Clean()
 
 		local vfLeft = Instance.new("VectorForce")
@@ -135,7 +136,11 @@ function Ragdoll:Toggle(enable)
 		task.delay(0.2, function()
 			self._vfTrove:Remove(vfLeft)
 			self._vfTrove:Remove(vfRight)
-		end)	
+		end)
+
+		game.Workspace.CurrentCamera.CameraSubject = chr.UpperTorso -- hrp tends to move a lot more in weird ways than uppertorso
+	else
+		game.Workspace.CurrentCamera.CameraSubject = chr.Humanoid
 	end
 
 	--[[

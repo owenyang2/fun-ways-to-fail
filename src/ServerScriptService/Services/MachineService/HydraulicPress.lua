@@ -93,7 +93,7 @@ function HydraulicPress:Press()
             local current = {}
 
             for _, dir in ipairs({"LookVector", "UpVector", "RightVector"}) do
-                local yAmt = math.abs(chr.HumanoidRootPart.CFrame[dir].Y) -- how much the part's face is facing up, use abs in case is facing down
+                local yAmt = math.abs(chr.UpperTorso.CFrame[dir].Y) -- how much the part's face is facing up, use abs in case is facing down
 
                 if current.Dir == nil or current.Amt < yAmt then
                     current.Amt = yAmt
@@ -146,7 +146,7 @@ function HydraulicPress:ChangeState(state)
             self:Press()
         elseif state == "Resetting" then
             self:Reset()
-        end    
+        end
     end)
 end
 
