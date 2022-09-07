@@ -100,14 +100,14 @@ function Ragdoll:Toggle(enable)
 
 	local chr = self.Player.Character
 
-	if not chr then return end
+	if not chr or not chr.HumanoidRootPart then return end
 	
 	enable = if enable ~= nil then enable else not self.Ragdolled
 
 	self.Ragdolled = enable
 	
-	self.Player.Character.HumanoidRootPart.CanCollide = not enable
-	self.Player.Character.HumanoidRootPart.Massless = enable
+	chr.HumanoidRootPart.CanCollide = not enable
+	chr.HumanoidRootPart.Massless = enable
 	
 	for _, motor in ipairs(self.Motor6DJoints) do
 		motor.Enabled = not enable
@@ -132,7 +132,7 @@ function Ragdoll:Toggle(enable)
 		vfRight.Parent = chr.RightUpperLeg
 		self._vfTrove:Add(vfRight)
 	
-		task.delay(1, function()
+		task.delay(0.2, function()
 			self._vfTrove:Remove(vfLeft)
 			self._vfTrove:Remove(vfRight)
 		end)	
