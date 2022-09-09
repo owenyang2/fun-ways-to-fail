@@ -67,7 +67,7 @@ function ConveyorService:KnitStart()
     }
 
     self.DefaultConveyorSpeed = 100
-    self.AnimationTime = 0.2
+    self.AnimationTime = 1
 
     self.Animations = {}
 

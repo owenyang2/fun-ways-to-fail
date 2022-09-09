@@ -7,34 +7,9 @@ local TweenService = game:GetService("TweenService")
 
 local Trove = require(RepStorage.Packages.Trove)
 
-HydraulicPress.AvailablePresses = { -- available presses
+HydraulicPress.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Hydraulic Press")
 } 
-
-local function getAvailablePress()
-    if #HydraulicPress.AvailablePresses == 0 then warn("No available hydraulic presses to set up.") return end
-
-    local press = HydraulicPress.AvailablePresses[#HydraulicPress.AvailablePresses]
-    table.remove(HydraulicPress.AvailablePresses, #HydraulicPress.AvailablePresses)
-    return press
-end
-
-local function getHitboxParams() -- returns updated overlap params for press hitbox
-    local params = OverlapParams.new()
-    params.FilterType = Enum.RaycastFilterType.Whitelist
-    
-    local filterDesc = {}
-
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            table.insert(filterDesc, plr.Character)
-        end
-    end
-
-    params.FilterDescendantsInstances = filterDesc
-
-    return params
-end
 
 local function findPartNormal(part)
     -- find which side of the part is being pressed (facing up) by casting a straight ray down above it, and checking the result's normal
@@ -51,7 +26,7 @@ end
 
 function HydraulicPress:Idle()
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, getHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, self:GetHitboxParams())
         local foundChrs = {}
 
         for _, part in ipairs(parts) do
@@ -74,7 +49,7 @@ function HydraulicPress:Press()
     -- TODO: constantly detect player limbs facing up and squish them
     
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Press, getHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Press, self:GetHitboxParams())
 
         local dirToScale = {
             RightVector = "BodyWidthScale",
@@ -164,11 +139,11 @@ function HydraulicPress:CreateTweens()
 end
 
 function HydraulicPress.new()
-    local press = getAvailablePress()
-    if not press then return end
+    local newInst = HydraulicPress:GetAvailableInst()
+    if not newInst then return end
 
     local newHydraulicPress = setmetatable({
-        Instance = press,
+        Instance = newInst,
         State = nil, -- Idle, Active, Resetting
         
         _trove = Trove.new(),
