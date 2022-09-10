@@ -18,31 +18,30 @@ local function callTweenFunc(self, func) -- call a function for all tweens in pa
     end
 end
 
-function Volcano:TurnBlack(chr)
-    local info = self.BurningChrs[chr]
-    
-    if info.State ~= "TurningRed" and not string.find(info.State, "Paused") then return end
+function Volcano:TurnBlack(chr)    
+    if self.BurningChrs[chr].State ~= "TurningRed" and not string.find(self.BurningChrs[chr].State, "Paused") then print("no") return end
 
-    info.State = "TurningBlack"
-    info[chr].TurnBlackTweens:CallFunc("Play")
+    self.BurningChrs[chr].State = "TurningBlack"
+    self.BurningChrs[chr].TurnBlackTweens:CallFunc("Play")
 end
 
-function Volcano:TurnRed(chr)
-    local info = self.BurningChrs[chr]
-    
-    if info.State ~= "NotBurning" and not string.find(info.State, "Paused") then return end
+function Volcano:TurnRed(chr)    
+    if self.BurningChrs[chr].State ~= "NotBurning" and not string.find(self.BurningChrs[chr].State, "Paused") then return end
 
-    info.State = "TurningRed"
-    info[chr].TurnRedTweens:CallFunc("Play")
+    self.BurningChrs[chr].State = "TurningRed"
+    self.BurningChrs[chr].TurnRedTweens:CallFunc("Play")
 end
 
 function Volcano:Burn(chr)
-    local info = self.BurningChrs[chr]
+    if self.BurningChrs[chr] and self.BurningChrs[chr].State == "Dead" then return end
 
-    if info and string.find(info.State, "Paused") then
-        task.spawn(function()
-            self:ResumeBurn(chr)
-        end)
+    --  this function is mostly just setup
+    if self.BurningChrs[chr] then
+        if string.find(self.BurningChrs[chr].State, "Paused") then
+            task.spawn(function()
+                self:ResumeBurn(chr)
+            end)    
+        end
         return
     end
 
@@ -59,56 +58,67 @@ function Volcano:Burn(chr)
         _trove = Trove.new()
     }
 
-    info._trove:Connect(chr.Humanoid.Died, function() -- should auto disconnect bc when character dies, humanoid is destroyed and gced
-        info._trove:Destroy() -- make sure all connections are properly cleaned up
+    self.BurningChrs[chr]._trove:Connect(chr.Humanoid.Died, function() -- should auto disconnect bc when character dies, humanoid is destroyed and gced
+        self.BurningChrs[chr].State = "Dead"
+    end)
+
+    self.BurningChrs[chr]._trove:Connect(game.Players:GetPlayerFromCharacter(chr).CharacterAdded, function()
+        self.BurningChrs[chr]._trove:Destroy() -- make sure all connections are properly cleaned up
         self.BurningChrs[chr] = nil -- all data should be auto gced once out of scope but just in case i guess
     end)
 
     for _, bodyColor in ipairs(self.BodyColors) do
-        table.insert(info.TurnRedTweens,
-            TweenService:Create(chr.Character["Body Colors"], self.Config.TurnRedInfo, {[bodyColor] = self.Config.TurnRedColor})
+        table.insert(self.BurningChrs[chr].TurnRedTweens,
+            TweenService:Create(chr["Body Colors"], self.Config.TurnRedInfo, {[bodyColor] = self.Config.TurnRedColor})
         )
 
-        table.insert(info.TurnBlackTweens,
-            TweenService:Create(chr.Character["Body Colors"], self.Config.TurnBlackInfo, {[bodyColor] = self.Config.TurnBlackColor})
+        table.insert(self.BurningChrs[chr].TurnBlackTweens,
+            TweenService:Create(chr["Body Colors"], self.Config.TurnBlackInfo, {[bodyColor] = self.Config.TurnBlackColor})
         )
     end
 
-    info._trove:Connect(info.TurnRedTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
+    self.BurningChrs[chr]._trove:Connect(self.BurningChrs[chr].TurnRedTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
         if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
             task.wait(self.Config.ChangeInterval)
             self:TurnBlack(chr)
         end
     end)
 
-    info._trove:Connect(info.TurnBlackTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
+    self.BurningChrs[chr]._trove:Connect(self.BurningChrs[chr].TurnBlackTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
         if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
             task.wait(self.Config.ChangeInterval)
-            chr.Character.Humanoid:TakeDamage(chr.Character.Humanoid.Health)
+            chr.Humanoid:TakeDamage(chr.Humanoid.Health)
         end
     end)
+
+    self:TurnRed(chr)
 end
 
 function Volcano:ResumeBurn(chr)
-    local info = self.BurningChrs[chr]
+    if not self.BurningChrs[chr] or self.BurningChrs[chr].State == "Dead" then return end
 
-    if info.State == "PausedTurningRed" then
+    print("resume")
+
+    if self.BurningChrs[chr].State == "PausedTurningRed" then
         self:TurnRed(chr)
-    elseif info.State == "PausedTurningBlack" then
+    elseif self.BurningChrs[chr].State == "PausedTurningBlack" then
         self:TurnBlack(chr)
     end
 end
 
 function Volcano:StopBurn(chr)
-    local info = self.BurningChrs[chr]
+    if not self.BurningChrs[chr] or self.BurningChrs[chr].State == "Dead" then return end
+    if string.find(self.BurningChrs[chr].State, "Paused") then return end
 
-    if info.State == "TurningRed" then
-        info.TurnRedTweens:CallFunc("Pause")
-    elseif info.State == "TurningBlack" then
-        info.TurnBlackTweens:CallFunc("Pause")
+    print("pause", self.BurningChrs[chr].State)
+
+    if self.BurningChrs[chr].State == "TurningRed" then
+        self.BurningChrs[chr].TurnRedTweens:CallFunc("Pause")
+    elseif self.BurningChrs[chr].State == "TurningBlack" then
+        self.BurningChrs[chr].TurnBlackTweens:CallFunc("Pause")
     end
 
-    info.State = "Paused" .. info.State -- get an identifiyable key to know which stage to return to
+    self.BurningChrs[chr].State = "Paused" .. self.BurningChrs[chr].State -- get an identifiyable key to know which stage to return to
 end
 
 function Volcano:Enable()
@@ -117,12 +127,12 @@ function Volcano:Enable()
     self._trove:Connect(RunService.Heartbeat, function(dt)
         local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self:GetHitboxParams())
 
-        local doneChrs = {} -- characters who already done action
+        local doneChrs = {} -- characters who already updated stay length
 
         for _, part in ipairs(parts) do
             local chr = part.Parent
             local plr = game.Players:GetPlayerFromCharacter(chr)
-            if not plr or table.find(doneChrs, chr) or table.find(self.BurningPlrs, plr) then return end
+            if not plr or table.find(doneChrs, chr) then return end
             
             table.insert(doneChrs, chr)
 
