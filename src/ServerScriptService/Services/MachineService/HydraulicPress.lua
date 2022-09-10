@@ -139,7 +139,7 @@ function HydraulicPress:CreateTweens()
 end
 
 function HydraulicPress.new()
-    local newInst = HydraulicPress:GetAvailableInst()
+    local newInst = HydraulicPress:GetAvailableInst(HydraulicPress.AvailableInstances)
     if not newInst then return end
 
     local newHydraulicPress = setmetatable({

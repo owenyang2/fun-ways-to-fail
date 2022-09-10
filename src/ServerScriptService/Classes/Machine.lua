@@ -23,10 +23,10 @@ end
 function Machine:GetAvailableInst(instTbl)
     local available = #instTbl
 
-    if #available == 0 then warn("No available hydraulic presses to set up.") return end
+    if available == 0 then warn("No available hydraulic presses to set up.") return end
 
-    local inst = instTbl[#available]
-    table.remove(instTbl, #available)
+    local inst = instTbl[available]
+    table.remove(instTbl, available)
     return inst
 end
 
