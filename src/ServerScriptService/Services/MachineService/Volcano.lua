@@ -11,25 +11,104 @@ Volcano.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Volcano")
 }
 
-function Volcano:Burn(plr)
-    table.insert(self.BurningPlrs, plr)
+local function callTweenFunc(self, func) -- call a function for all tweens in passed table
+    for _, tween in ipairs(self) do
+        if not tween:IsA("Tween") then continue end
+        tween[func](tween) -- basically tween:func()
+    end
+end
 
-    for _, bodyColor in ipairs(self.BodyColors) do
-        local tween = TweenService:Create(plr.Character["Body Colors"], self.Config.TurnRedInfo, {[bodyColor] = self.Config.TurnRedColor})
-        tween:Play()
+function Volcano:TurnBlack(chr)
+    local info = self.BurningChrs[chr]
+    
+    if info.State ~= "TurningRed" and not string.find(info.State, "Paused") then return end
+
+    info.State = "TurningBlack"
+    info[chr].TurnBlackTweens:CallFunc("Play")
+end
+
+function Volcano:TurnRed(chr)
+    local info = self.BurningChrs[chr]
+    
+    if info.State ~= "NotBurning" and not string.find(info.State, "Paused") then return end
+
+    info.State = "TurningRed"
+    info[chr].TurnRedTweens:CallFunc("Play")
+end
+
+function Volcano:Burn(chr)
+    local info = self.BurningChrs[chr]
+
+    if info and string.find(info.State, "Paused") then
+        task.spawn(function()
+            self:ResumeBurn(chr)
+        end)
+        return
     end
 
-    task.wait(self.Config.TurnRedInfo.Time + self.Config.ChangeInterval)
+    self.BurningChrs[chr] = {
+        TurnRedTweens = {
+            CallFunc = callTweenFunc,
+        },
+        
+        TurnBlackTweens = {
+            CallFunc = callTweenFunc
+        },
+
+        State = "NotBurning", -- NotBurning (start), TurningRed, TurningBlack, Paused
+        _trove = Trove.new()
+    }
+
+    info._trove:Connect(chr.Humanoid.Died, function() -- should auto disconnect bc when character dies, humanoid is destroyed and gced
+        info._trove:Destroy() -- make sure all connections are properly cleaned up
+        self.BurningChrs[chr] = nil -- all data should be auto gced once out of scope but just in case i guess
+    end)
 
     for _, bodyColor in ipairs(self.BodyColors) do
-        local tween = TweenService:Create(plr.Character["Body Colors"], self.Config.TurnBlackInfo, {[bodyColor] = self.Config.TurnBlackColor})
-        tween:Play()
+        table.insert(info.TurnRedTweens,
+            TweenService:Create(chr.Character["Body Colors"], self.Config.TurnRedInfo, {[bodyColor] = self.Config.TurnRedColor})
+        )
+
+        table.insert(info.TurnBlackTweens,
+            TweenService:Create(chr.Character["Body Colors"], self.Config.TurnBlackInfo, {[bodyColor] = self.Config.TurnBlackColor})
+        )
     end
 
-    task.wait(self.Config.TurnBlackInfo.Time)
+    info._trove:Connect(info.TurnRedTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
+        if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
+            task.wait(self.Config.ChangeInterval)
+            self:TurnBlack(chr)
+        end
+    end)
 
-    plr.Character.Humanoid:TakeDamage(plr.Character.Humanoid.Health)
-    table.remove(self.BurningPlrs, table.find(self.BurningPlrs, plr))
+    info._trove:Connect(info.TurnBlackTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
+        if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
+            task.wait(self.Config.ChangeInterval)
+            chr.Character.Humanoid:TakeDamage(chr.Character.Humanoid.Health)
+        end
+    end)
+end
+
+function Volcano:ResumeBurn(chr)
+    local info = self.BurningChrs[chr]
+
+    if info.State == "PausedTurningRed" then
+        self:TurnRed(chr)
+    elseif info.State == "PausedTurningBlack" then
+        self:TurnBlack(chr)
+    end
+end
+
+function Volcano:StopBurn(chr)
+    local info = self.BurningChrs[chr]
+
+    if info.State == "TurningRed" then
+        info.TurnRedTweens:CallFunc("Pause")
+    elseif info.State == "TurningBlack" then
+        info.TurnBlackTweens:CallFunc("Pause")
+    end
+
+    info.State = "Paused" .. info.State -- get an identifiyable key to know which stage to return to
 end
 
 function Volcano:Enable()
@@ -52,13 +131,18 @@ function Volcano:Enable()
             chrTbl[chr].StayLength += dt
 
             if chrTbl[chr].StayLength > self.Config.BurnDelay then
-                self:Burn(plr)
+                task.spawn(function() -- prevent thread pausing
+                    self:Burn(chr)
+                end)
             end
         end
 
         for chr, _ in pairs(chrTbl) do -- if left volcano
             if not table.find(doneChrs, chr) then
                 chrTbl[chr] = nil
+                task.spawn(function() -- prevent thread pausing
+                    self:StopBurn(chr)
+                end)
             end
         end
     end)
@@ -102,7 +186,7 @@ function Volcano.new()
             "TorsoColor3"
         },
 
-        BurningPlrs = {}
+        BurningChrs = {}
     }, Volcano)
 
     return Volcano
