@@ -4,7 +4,7 @@ local RepStorage = game:GetService("ReplicatedStorage")
 
 local Knit = require(RepStorage.Packages.Knit)
 
-local MachineClass = require(script.Parent.Parent.Classes.Machine)
+local MachineFunctions = require(script.Parent.Parent.Other.MachineFunctions)
 
 local MachineService = Knit.CreateService {
     Name = "MachineService",
@@ -18,10 +18,9 @@ function MachineService:SetupMachines()
             continue
         end
 
-        --hierarchy is
-        --General Machine -> Specific Machine -> New Machine
-
-        local newMachine = MachineClass.new(require(module)).new() -- make specific machine inherit from bigger machine class and make new
+        local newMachine = require(module).new({
+            MachineFuncs = MachineFunctions
+        }) 
         newMachine:Start()
     end
 end

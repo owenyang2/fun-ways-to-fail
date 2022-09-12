@@ -1,9 +1,8 @@
--- machine class that can be inherited for useful functions for all machines
+-- machine class that can be called for useful functions for all machines
 
-local Machine = {}
-Machine.__index = Machine
+local MachineFunctions = {}
 
-function Machine:GetHitboxParams()
+function MachineFunctions.GetHitboxParams()
     local params = OverlapParams.new()
     params.FilterType = Enum.RaycastFilterType.Whitelist
     
@@ -20,7 +19,7 @@ function Machine:GetHitboxParams()
     return params
 end
 
-function Machine:GetAvailableInst(instTbl)
+function MachineFunctions.GetAvailableInst(instTbl)
     local available = #instTbl
 
     if available == 0 then warn("No available hydraulic presses to set up.") return end
@@ -30,8 +29,4 @@ function Machine:GetAvailableInst(instTbl)
     return inst
 end
 
-function Machine.new(class)
-    return setmetatable(class, Machine)
-end
-
-return Machine
+return MachineFunctions

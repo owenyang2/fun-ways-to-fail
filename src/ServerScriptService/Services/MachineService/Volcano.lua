@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Trove = require(RepStorage.Packages.Trove)
+local TableUtil = require(RepStorage.Packages.TableUtil)
 
 Volcano.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Volcano")
@@ -125,7 +126,7 @@ function Volcano:Enable()
     local chrTbl = {}
 
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self:GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self.MachineFuncs.GetHitboxParams())
 
         local doneChrs = {} -- characters who already updated stay length
 
@@ -166,11 +167,11 @@ function Volcano:Start()
     self:Enable()    
 end
 
-function Volcano.new()
-    local newInst = Volcano:GetAvailableInst(Volcano.AvailableInstances)
+function Volcano.new(baseTbl)
+    local newInst = baseTbl.MachineFuncs.GetAvailableInst(Volcano.AvailableInstances)
     if not newInst then return end
 
-    local Volcano = setmetatable({
+    local Volcano = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         
         _trove = Trove.new(),
@@ -197,7 +198,7 @@ function Volcano.new()
         },
 
         BurningChrs = {}
-    }, Volcano)
+    }), Volcano)
 
     return Volcano
 end

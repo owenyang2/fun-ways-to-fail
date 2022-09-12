@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Trove = require(RepStorage.Packages.Trove)
+local TableUtil = require(RepStorage.Packages.TableUtil)
 
 HydraulicPress.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Hydraulic Press")
@@ -26,7 +27,7 @@ end
 
 function HydraulicPress:Idle()
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, self:GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, self.MachineFuncs.GetHitboxParams())
         local foundChrs = {}
 
         for _, part in ipairs(parts) do
@@ -49,7 +50,7 @@ function HydraulicPress:Press()
     -- TODO: constantly detect player limbs facing up and squish them
     
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Press, self:GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Press, self.MachineFuncs.GetHitboxParams())
 
         local dirToScale = {
             RightVector = "BodyWidthScale",
@@ -138,11 +139,11 @@ function HydraulicPress:CreateTweens()
     }
 end
 
-function HydraulicPress.new()
-    local newInst = HydraulicPress:GetAvailableInst(HydraulicPress.AvailableInstances)
+function HydraulicPress.new(baseTbl)
+    local newInst = baseTbl.MachineFuncs.GetAvailableInst(HydraulicPress.AvailableInstances)
     if not newInst then return end
 
-    local newHydraulicPress = setmetatable({
+    local newHydraulicPress = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         State = nil, -- Idle, Active, Resetting
         
@@ -156,7 +157,7 @@ function HydraulicPress.new()
 
             PressLimit = 0.2
         }
-    }, HydraulicPress)
+    }), HydraulicPress)
 
     newHydraulicPress:CreateTweens()
 
