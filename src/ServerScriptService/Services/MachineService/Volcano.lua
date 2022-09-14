@@ -2,11 +2,16 @@ local Volcano = {}
 Volcano.__index = Volcano
 
 local RepStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local CollectionService = game:GetService("CollectionService")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
+local Promise = require(RepStorage.Packages.Promise)
+
+local Quicksand = require(ServerScriptService.Server.Components.Quicksand)
 
 Volcano.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Volcano")
@@ -125,6 +130,12 @@ end
 function Volcano:Enable()
     local chrTbl = {}
 
+    Quicksand:WaitForInstance(self.Instance.Lava):andThen(function(componentInst)
+        componentInst:Enable()
+    end):catch(function(err)
+        warn(tostring(err))
+    end)
+    
     self._trove:Connect(RunService.Heartbeat, function(dt)
         local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self.MachineFuncs.GetHitboxParams())
 
@@ -161,17 +172,23 @@ end
 
 function Volcano:Disable()
     self._trove:Clean()
+
+    Quicksand:WaitForInstance(self.Instance.Lava):andThen(function(componentInst)
+        componentInst:Disable()
+    end):catch(function(err)
+        warn(tostring(err))
+    end)
 end
 
 function Volcano:Start()
-    self:Enable()    
+    self:Enable()
 end
 
 function Volcano.new(baseTbl)
     local newInst = baseTbl.MachineFuncs.GetAvailableInst(Volcano.AvailableInstances)
     if not newInst then return end
 
-    local Volcano = setmetatable(TableUtil.Assign(baseTbl, {
+    local newVolcano = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         
         _trove = Trove.new(),
@@ -200,7 +217,9 @@ function Volcano.new(baseTbl)
         BurningChrs = {}
     }), Volcano)
 
-    return Volcano
+    CollectionService:AddTag(newInst.Lava, Quicksand.Tag)
+
+    return newVolcano
 end
 
 return Volcano

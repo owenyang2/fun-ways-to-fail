@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local RepStorage = game:GetService("ReplicatedStorage")
 
 local Component = require(RepStorage.Packages.Component)
+local Trove = require(RepStorage.Packages.Trove)
 
 local MachineFuncs = require(script.Parent.Parent.Other.MachineFunctions)
 
@@ -11,7 +12,7 @@ local Quicksand = Component.new {
 }
 
 function Quicksand:Sink(chr)
-    
+    chr.HumanoidRootPart.Anchored = 0
 end
 
 function Quicksand:Enable()
@@ -37,12 +38,13 @@ function Quicksand:Enable()
     end)
 end
 
-function Quicksand:Construct()
-    self.SinkingChrs = {}
+function Quicksand:Disable()
+    self._trove:Clean()
 end
 
-function Quicksand:Start()
-    self:Enable()
+function Quicksand:Construct()
+    self.SinkingChrs = {}
+    self._trove = Trove.new()
 end
 
 return Quicksand
