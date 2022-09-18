@@ -100,7 +100,7 @@ function Ragdoll:Toggle(enable)
 
 	local chr = self.Player.Character
 
-	if not chr or not chr.HumanoidRootPart then return end
+	if not chr or not chr:FindFirstChild("HumanoidRootPart") or not self.CanRagdoll then return end
 	
 	enable = if enable ~= nil then enable else not self.Ragdolled
 
@@ -169,6 +169,7 @@ end
 
 function Ragdoll:Setup()
 	self._trove:Connect(self.Player.CharacterAdded, function(chr) -- should be disconnected when cleaned up
+		self.CanRagdoll = true
 		self:CreateJoints()
 		chr.Humanoid.BreakJointsOnDeath = false
 		self._trove:Connect(chr.Humanoid.Died, function() -- setup ragdoll on death
@@ -185,7 +186,9 @@ function Ragdoll.new(plr)
 		Ragdolled = false,
 		
 		RagdollJoints = {}, -- ragdoll joints
-		Motor6DJoints = {} -- normal motor6d joints
+		Motor6DJoints = {}, -- normal motor6d joints
+		
+		CanRagdoll = true
 	}, Ragdoll)
 
 	Ragdoll.GlobalRagdolls[plr] = newRagdoll
