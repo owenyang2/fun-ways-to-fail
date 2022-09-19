@@ -15,28 +15,39 @@ local Quicksand = Component.new {
 }
 
 function Quicksand:Sink(chr)
+    if self.SinkingChrs[chr] then return end
+    
+    self.SinkingChrs[chr] = "temp" -- store a temp value to make sure it doesn't run again
+
     local ragdoll = Ragdoll.GlobalRagdolls[game.Players:GetPlayerFromCharacter(chr)]
     ragdoll:Toggle(false)
     ragdoll.CanRagdoll = false
 
-    chr.Humanoid.WalkSpeed = 0
-    chr.Humanoid.JumpHeight = 0
+    chr.HumanoidRootPart.Anchored = true
 
-    local yPos = self.Instance.Position.Y + (self.Instance.Size.Y / 2) - chr.Humanoid.HipHeight + (chr.HumanoidRootPart.Size.Y / 2)
+    for _, animTrack in ipairs(chr.Humanoid.Animator:GetPlayingAnimationTracks()) do
+        animTrack:Stop()
+    end
 
-    local targetCF = CFrame.new(
-        chr.HumanoidRootPart.Position.X, yPos, chr.HumanoidRootPart.Position.Z
-    )
-
+    chr.Animate.Disabled = true
+    
+    local chrHeight = (chr.Humanoid.HipHeight + chr.HumanoidRootPart.Size.Y / 2) * 2
+    local targetCF = chr.HumanoidRootPart.CFrame - Vector3.new(0, chrHeight, 0)
+    
     local info = TweenInfo.new(self.Config.SinkTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
     local tween = TweenService:Create(chr.HumanoidRootPart, info, {CFrame = targetCF})
     self.SinkingChrs[chr] = tween
     tween:Play()
+
+    local conn
+
+    conn = chr.Humanoid.Died:Connect(function()
+        conn:Disconnect()
+        self.SinkingChrs[chr] = nil
+    end)
 end
 
 function Quicksand:Enable()
-    local chrTbl = {}
-
     self._trove:Connect(RunService.Heartbeat, function(dt) -- if player touches quicksand, start sinking them
         local parts = game.Workspace:GetPartsInPart(self.Instance, MachineFuncs.GetHitboxParams())
 
@@ -48,7 +59,6 @@ function Quicksand:Enable()
             if not plr or table.find(doneChrs, chr) then return end
             
             table.insert(doneChrs, chr)
-            table.insert(chrTbl, chr)
 
             task.spawn(function() -- prevent thread pausing
                 self:Sink(chr)

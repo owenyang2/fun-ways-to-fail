@@ -92,8 +92,13 @@ function Volcano:Burn(chr)
 
     self.BurningChrs[chr]._trove:Connect(self.BurningChrs[chr].TurnBlackTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
         if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
-            task.wait(self.Config.ChangeInterval)
-            chr.Humanoid:TakeDamage(chr.Humanoid.Health)
+            task.wait(self.Config.ChangeInterval)            
+            for _, part in ipairs(chr:GetDescendants()) do
+                if not part:IsA("BasePart") then continue end
+                part.Anchored = true
+            end
+            chr.Head.Neck:Destroy()
+            --chr.Humanoid:TakeDamage(chr.Humanoid.Health)
         end
     end)
 
