@@ -11,7 +11,7 @@ local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
 local Promise = require(RepStorage.Packages.Promise)
 
-local Quicksand = require(ServerScriptService.Server.Components.Quicksand)
+local Quicksand = require(ServerScriptService.Server.Classes.Quicksand)
 
 Volcano.AvailableInstances = { -- available presses
     game.Workspace.PlaceModels:FindFirstChild("Volcano")
@@ -135,11 +135,7 @@ end
 function Volcano:Enable()
     local chrTbl = {}
 
-    Quicksand:WaitForInstance(self.Instance.Lava):andThen(function(componentInst)
-        componentInst:Enable()
-    end):catch(function(err)
-        warn(tostring(err))
-    end)
+    self.QuicksandClass:Enable()
     
     self._trove:Connect(RunService.Heartbeat, function(dt)
         local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self.MachineFuncs.GetHitboxParams())
@@ -178,11 +174,7 @@ end
 function Volcano:Disable()
     self._trove:Clean()
 
-    Quicksand:WaitForInstance(self.Instance.Lava):andThen(function(componentInst)
-        componentInst:Disable()
-    end):catch(function(err)
-        warn(tostring(err))
-    end)
+    self.QuicksandClass:Disable()
 end
 
 function Volcano:Start()
@@ -219,10 +211,10 @@ function Volcano.new(baseTbl)
             "TorsoColor3"
         },
 
-        BurningChrs = {}
-    }), Volcano)
+        BurningChrs = {},
 
-    CollectionService:AddTag(newInst.Lava, Quicksand.Tag)
+        QuicksandClass = Quicksand.new(newInst)
+    }), Volcano)
 
     return newVolcano
 end
