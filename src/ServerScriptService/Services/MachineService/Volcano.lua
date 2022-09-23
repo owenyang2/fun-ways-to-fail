@@ -137,8 +137,10 @@ function Volcano:Enable()
 
     self.QuicksandClass:Enable()
     
+    ----[[
+
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Lava, self.MachineFuncs.GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.LavaHitbox, self.MachineFuncs.GetHitboxParams())
 
         local doneChrs = {} -- characters who already updated stay length
 
@@ -169,6 +171,8 @@ function Volcano:Enable()
             end
         end
     end)
+
+    --]]
 end
 
 function Volcano:Disable()
@@ -191,7 +195,7 @@ function Volcano.new(baseTbl)
         _trove = Trove.new(),
 
         Config = {
-            BurnDelay = 1, -- how long until player starts burning
+            BurnDelay = 0, -- how long until player starts burning and sinking
             
             ChangeInterval = 1,
 
@@ -213,7 +217,7 @@ function Volcano.new(baseTbl)
 
         BurningChrs = {},
 
-        QuicksandClass = Quicksand.new(newInst)
+        QuicksandClass = Quicksand.new(newInst.Lava)
     }), Volcano)
 
     return newVolcano

@@ -14,23 +14,26 @@ local ServerComm = require(RepStorage.Packages.Comm).ServerComm
 local serverComm = ServerComm.new(RepStorage, "Quicksand")
 
 local Quicksand = {}
+Quicksand.__index = Quicksand
 
 function Quicksand:Sink(chr)
     if self.SinkingChrs[chr] then return end
-    
+        
     self.SinkingChrs[chr] = "temp" -- store a temp value to make sure it doesn't run again
 
     local ragdoll = Ragdoll.GlobalRagdolls[game.Players:GetPlayerFromCharacter(chr)]
     ragdoll:Toggle(false)
     ragdoll.CanRagdoll = false
 
-    chr.HumanoidRootPart.Anchored = true
+    chr.Animate.Disabled = true
 
     for _, animTrack in ipairs(chr.Humanoid.Animator:GetPlayingAnimationTracks()) do
         animTrack:Stop()
     end
 
-    chr.Animate.Disabled = true
+    chr.HumanoidRootPart.Anchored = true
+
+    self.StartSinkSignal:Fire(game.Players:GetPlayerFromCharacter(chr))
     
     local chrHeight = (chr.Humanoid.HipHeight + chr.HumanoidRootPart.Size.Y / 2) * 2
     local targetCF = chr.HumanoidRootPart.CFrame - Vector3.new(0, chrHeight, 0)
@@ -42,16 +45,16 @@ function Quicksand:Sink(chr)
         end
     end)
 
-    local conn
-
-    conn = chr.Humanoid.Died:Connect(function()
-        conn:Disconnect()
+    chr.Humanoid.Died:Connect(function()
+        print("died")
         self.SinkingChrs[chr] = nil
     end)
 end
 
 function Quicksand:Escape(chr)
-    
+    if self.SinkingChrs[chr] then
+        chr.HumanoidRootPart.Position += Vector3.new(0, 1, 0)
+    end
 end
 
 function Quicksand:Enable()
@@ -84,13 +87,16 @@ end
 
 function Quicksand.new(inst, config)
     local newQuicksand = setmetatable({
+        Instance = inst,
+
         Config = config or {
             SinkIncrement = -0.05, -- how many studs to sink per heartbeat
             SinkDelay = 0, -- 0 is every heartbeat, how long to delay for each step
         },
 
         SinkingChrs = {},
-        _trove = Trove.new()
+        _trove = Trove.new(),
+        StartSinkSignal = serverComm:CreateSignal("StartSinking")
     }, Quicksand)
         
     return newQuicksand
