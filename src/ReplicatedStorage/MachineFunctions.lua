@@ -1,4 +1,4 @@
--- machine class that can be called for useful functions for all machines
+-- machine handler that can be called for useful functions for all machines
 
 local MachineFunctions = {}
 

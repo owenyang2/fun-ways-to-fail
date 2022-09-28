@@ -142,24 +142,11 @@ function Ragdoll:Toggle(enable)
 	else
 		game.Workspace.CurrentCamera.CameraSubject = chr.Humanoid
 	end
-
-	--[[
-	task.delay(1, function()
-		chr.LeftUpperLeg.CFrame *= CFrame.Angles(0, math.rad(180), 0)
-		chr.RightUpperLeg.CFrame *= CFrame.Angles(0, math.rad(180), 0)	
-	end)
-	--]]
 end
 
---[[
-function Ragdoll:Enable()
-	self:Toggle(true)	
+function Ragdoll:CanRagdoll(canRagdoll)
+	self.CanRagdoll = canRagdoll
 end
-
-function Ragdoll:Disable()
-	self:Toggle(false)	
-end
---]]
 
 function Ragdoll:Destroy()
 	self:Toggle(false)

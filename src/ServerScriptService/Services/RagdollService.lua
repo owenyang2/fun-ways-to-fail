@@ -9,16 +9,28 @@ local RagdollService = Knit.CreateService {
     Client = {}
 }
 
-function RagdollService.Client:ToggleRagdoll(plr, enable)
+local function getRagdollInst(plr)
     local ragdollInst = Ragdoll.GlobalRagdolls[plr]
 
     if not ragdollInst then warn("Could not find player's ragdoll instance.") return end
+
+    return ragdollInst
+end
+
+function RagdollService.Client:ToggleRagdoll(plr, enable)
+    local ragdollInst = getRagdollInst(plr)
 
     if enable ~= nil then
         ragdollInst:Toggle(enable)
     else
         ragdollInst:Toggle()
     end
+end
+
+function RagdollService.Client:CanRagdoll(plr, canRagdoll)
+    local ragdollInst = getRagdollInst(plr)
+    
+    ragdollInst:CanRagdoll(canRagdoll)
 end
 
 function RagdollService.Client:GetRagdollStatus(plr)

@@ -4,7 +4,7 @@ local RepStorage = game:GetService("ReplicatedStorage")
 
 local Knit = require(RepStorage.Packages.Knit)
 
-local MachineFunctions = require(script.Parent.Parent.Other.MachineFunctions)
+local MachineFunctions = require(RepStorage.Common.MachineFunctions)
 
 local MachineService = Knit.CreateService {
     Name = "MachineService",
