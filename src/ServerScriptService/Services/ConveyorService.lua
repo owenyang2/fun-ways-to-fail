@@ -58,10 +58,10 @@ end
 
 function ConveyorService:KnitStart()
     self.Conveyors = { -- Direction = [Unit Vector of Direction], Speed = [Optional Custom Speed]
-        [game.Workspace.ConveyorAway] = {
+        [game.Workspace.Map.ConveyorAway] = {
             Direction = Vector3.new(0, 0, -1)
         },
-        [game.Workspace.ConveyorBack] = {
+        [game.Workspace.Map.ConveyorBack] = {
             Direction = Vector3.new(0, 0, 1)
         }
     }

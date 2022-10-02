@@ -144,7 +144,7 @@ function Ragdoll:Toggle(enable)
 	end
 end
 
-function Ragdoll:CanRagdoll(canRagdoll)
+function Ragdoll:EditCanRagdoll(canRagdoll)
 	self.CanRagdoll = canRagdoll
 end
 

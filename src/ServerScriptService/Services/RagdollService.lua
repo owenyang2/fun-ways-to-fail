@@ -27,10 +27,10 @@ function RagdollService.Client:ToggleRagdoll(plr, enable)
     end
 end
 
-function RagdollService.Client:CanRagdoll(plr, canRagdoll)
+function RagdollService.Client:EditCanRagdoll(plr, canRagdoll)
     local ragdollInst = getRagdollInst(plr)
     
-    ragdollInst:CanRagdoll(canRagdoll)
+    ragdollInst:EditCanRagdoll(canRagdoll)
 end
 
 function RagdollService.Client:GetRagdollStatus(plr)

@@ -7,8 +7,8 @@ local RagdollController = Knit.CreateController {
     Name = "RagdollController"
 }
 
-function RagdollController:Toggle()
-    self.RagdollService:ToggleRagdoll()
+function RagdollController:Toggle(enable)
+    self.RagdollService:ToggleRagdoll(enable)
 
     if self.RagdollService:GetRagdollStatus() then
         self.Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
@@ -17,14 +17,8 @@ function RagdollController:Toggle()
     end
 end
 
-function RagdollController:CanRagdoll()
-    self.RagdollService:ToggleRagdoll()
-
-    if self.RagdollService:GetRagdollStatus() then
-        self.Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-    else
-        self.Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-    end
+function RagdollController:EditCanRagdoll(canRagdoll)
+    self.RagdollService:EditCanRagdoll(canRagdoll)
 end
 
 function RagdollController:SetupInput()
@@ -32,7 +26,7 @@ function RagdollController:SetupInput()
         if not self.Player.Character then return end
         
         if input.KeyCode == Enum.KeyCode.R and not gameProcessed then
-            self:ToggleRagdoll()
+            self:Toggle()
         end
     end)
 end
