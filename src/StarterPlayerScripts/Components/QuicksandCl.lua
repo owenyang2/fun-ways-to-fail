@@ -12,6 +12,20 @@ local Quicksand = Component.new {
     Tag = "Quicksand"
 }
 
+function Quicksand:StopSink()
+    if not self.Sinking then return end
+    self.Sinking = false
+    self._trove:Clean()
+
+    local chr = self.Player.Character
+
+    if chr.Humanoid.Health > 0 then
+        chr:FindFirstChild("LinearVelocity"):Destroy()
+        chr.Animate.Disabled = false
+        self.RagdollController:EditCanRagdoll(true)
+    end
+end
+
 function Quicksand:Sink()
     if self.Sinking then return end
     self.Sinking = true
@@ -33,8 +47,7 @@ function Quicksand:Sink()
     linearVelocity.Parent = chr
 
     chr.Animate.Disabled = true
-
-    chr.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+    --chr.Humanoid.MaxSlopeAngle = 0
 
     self._trove:Connect(UserInputService.InputBegan, function(input, gameProcessed)
         if gameProcessed then return end
@@ -44,9 +57,18 @@ function Quicksand:Sink()
         end
     end)
 
+    self._trove:Connect(RunService.Heartbeat, function(dt)
+        for _, part in ipairs(game.Workspace:GetPartsInPart(self.Instance, MachineFuncs.GetHitboxParams())) do
+            if part.Parent == chr then
+                return
+            end
+        end
+
+        self:StopSink()
+    end)
+
     chr.Humanoid.Died:Connect(function()
-        self.Sinking = false
-        self._trove:Clean()
+        self:StopSink()
     end)
 end
 
@@ -58,12 +80,15 @@ function Quicksand:HeartbeatUpdate(dt)
 
     for _, part in ipairs(parts) do
         local chr = part.Parent
-        local plr = game.Players:GetPlayerFromCharacter(chr)
-        if not plr or self.Player ~= plr then return end
-        
-        task.spawn(function() -- prevent thread pausing
-            self:Sink()
-        end)
+        if self.Player.Character == chr then
+            task.spawn(function() -- prevent thread pausing
+                self:Sink()
+            end)    
+        else
+            task.spawn(function()
+                self:StopSink()
+            end)
+        end        
     end
 end
 
