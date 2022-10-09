@@ -143,7 +143,7 @@ function HydraulicPress.new(baseTbl)
     local newInst = baseTbl.MachineFuncs.GetAvailableInst(HydraulicPress.AvailableInstances)
     if not newInst then return end
 
-    local newHydraulicPress = setmetatable(TableUtil.Assign(baseTbl, {
+    local self = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         State = nil, -- Idle, Active, Resetting
         
@@ -159,9 +159,9 @@ function HydraulicPress.new(baseTbl)
         }
     }), HydraulicPress)
 
-    newHydraulicPress:CreateTweens()
+    self:CreateTweens()
 
-    return newHydraulicPress
+    return self
 end
 
 return HydraulicPress

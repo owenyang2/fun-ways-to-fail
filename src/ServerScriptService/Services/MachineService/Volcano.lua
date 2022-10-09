@@ -185,7 +185,7 @@ function Volcano.new(baseTbl)
     local newInst = baseTbl.MachineFuncs.GetAvailableInst(Volcano.AvailableInstances)
     if not newInst then return end
 
-    local newVolcano = setmetatable(TableUtil.Assign(baseTbl, {
+    local self = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         
         _trove = Trove.new(),
@@ -214,7 +214,7 @@ function Volcano.new(baseTbl)
         BurningChrs = {},
     }), Volcano)
 
-    return newVolcano
+    return self
 end
 
 return Volcano
