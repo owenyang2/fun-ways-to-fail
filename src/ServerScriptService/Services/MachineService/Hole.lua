@@ -21,20 +21,32 @@ function Hole:StartFall(plr)
     ragdoll:EditCanRagdoll(false)
 end
 
+function Hole:KillPlr(plr)
+    if not plr.Character then return end
+    plr.Character.Humanoid.Health = 0
+end
+
 function Hole:Enable()
     self._trove:Connect(RunService.Heartbeat, function(dt)
         local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, self.MachineFuncs.GetHitboxParams())
+        local parts2 = game.Workspace:GetPartsInPart(self.Instance.DeathHitbox, self.MachineFuncs.GetHitboxParams())
 
-        local doneChrs = {} -- characters who already updated stay length
+        local doneChrs = {} -- probably only need 1 because you cant be in both at once (?)
 
-        for _, part in ipairs(parts) do
+        for _, part in ipairs(TableUtil.Extend(parts, parts2)) do
             local chr = part.Parent
             local plr = game.Players:GetPlayerFromCharacter(chr)
             if not plr or table.find(doneChrs, chr) then return end
             
             table.insert(doneChrs, chr)
-
-            self:StartFall(plr)
+            
+            task.spawn(function()
+                if table.find(part, parts) then
+                    self:StartFall(plr)
+                else
+                    self:KillPlr(plr)
+                end
+            end)
         end
     end)
 end
