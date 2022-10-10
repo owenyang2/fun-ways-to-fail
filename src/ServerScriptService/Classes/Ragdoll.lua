@@ -156,11 +156,12 @@ end
 
 function Ragdoll:Setup()
 	self._trove:Connect(self.Player.CharacterAdded, function(chr) -- should be disconnected when cleaned up
-		self.CanRagdoll = true
+		self:EditCanRagdoll(true)
 		self:CreateJoints()
 		chr.Humanoid.BreakJointsOnDeath = false
 		self._trove:Connect(chr.Humanoid.Died, function() -- setup ragdoll on death
 			self:Toggle(true)
+			self:EditCanRagdoll(false)
 		end)
 	end)
 end

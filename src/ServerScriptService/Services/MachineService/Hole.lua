@@ -23,7 +23,7 @@ end
 
 function Hole:Enable()
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.LavaHitbox, self.MachineFuncs.GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.Hitbox, self.MachineFuncs.GetHitboxParams())
 
         local doneChrs = {} -- characters who already updated stay length
 

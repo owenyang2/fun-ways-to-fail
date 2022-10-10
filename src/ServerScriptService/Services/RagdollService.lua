@@ -6,7 +6,9 @@ local Knit = require(RepStorage.Packages.Knit)
 
 local RagdollService = Knit.CreateService {
     Name = "RagdollService",
-    Client = {}
+    Client = {
+        Reset = Knit.CreateSignal()
+    }
 }
 
 local function getRagdollInst(plr)
@@ -35,11 +37,25 @@ end
 
 function RagdollService.Client:GetRagdollStatus(plr)
     -- returns if ragdolled or not
-    local ragdollInst = Ragdoll.GlobalRagdolls[plr]
-
-    if not ragdollInst then warn("Could not find player's ragdoll instance.") return end
+    local ragdollInst = getRagdollInst(plr)
 
     return ragdollInst.Ragdolled
+end
+
+function RagdollService.Client:CheckCanRagdoll(plr)
+    -- returns if can ragdoll
+    local ragdollInst = getRagdollInst(plr)
+
+    return ragdollInst.CanRagdoll
+end
+
+function RagdollService:SetupSignals()
+    self.Client.Reset:Connect(function(plr)
+        if not plr.Character then return end
+        print("reset")
+
+        plr.Character.Humanoid.Health = 0
+    end)
 end
 
 function RagdollService:KnitStart()
@@ -55,6 +71,8 @@ function RagdollService:KnitStart()
             Ragdoll.GlobalRagdolls[plr]:Destroy()
         end
     end)
+
+    self:SetupSignals()
 end
 
 return RagdollService
