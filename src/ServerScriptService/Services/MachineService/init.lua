@@ -50,7 +50,8 @@ function MachineService:KnitStart()
     self.MachineModules = {
         script.HydraulicPress,
         script.Volcano,
-        script.Hole
+        script.Hole,
+        script.Saw
     } -- modules that can be required
 
     self:SetupMachines()
