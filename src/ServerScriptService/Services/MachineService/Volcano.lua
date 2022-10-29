@@ -24,6 +24,16 @@ local function callTweenFunc(self, func) -- call a function for all tweens in pa
     end
 end
 
+function Volcano:KillChr(chr)
+    for _, part in ipairs(chr:GetDescendants()) do
+        if not part:IsA("BasePart") then continue end
+        part.Anchored = true
+    end
+    chr.Head.Neck:Destroy()
+
+    self.BurningChrs[chr].State = "Dead"
+end
+
 function Volcano:TurnBlack(chr)    
     if self.BurningChrs[chr].State ~= "TurningRed" and not string.find(self.BurningChrs[chr].State, "Paused") then print("no") return end
 
@@ -43,11 +53,9 @@ function Volcano:Burn(chr)
 
     --  this function is mostly just setup
     if self.BurningChrs[chr] then
-        if string.find(self.BurningChrs[chr].State, "Paused") then
-            task.spawn(function()
-                self:ResumeBurn(chr)
-            end)    
-        end
+        task.spawn(function()
+            self:ResumeBurn(chr)
+        end)
         return
     end
 
@@ -63,10 +71,6 @@ function Volcano:Burn(chr)
         State = "NotBurning", -- NotBurning (start), TurningRed, TurningBlack, Paused
         _trove = Trove.new()
     }
-
-    self.BurningChrs[chr]._trove:Connect(chr.Humanoid.Died, function() -- should auto disconnect bc when character dies, humanoid is destroyed and gced
-        self.BurningChrs[chr].State = "Dead"
-    end)
 
     self.BurningChrs[chr]._trove:Connect(game.Players:GetPlayerFromCharacter(chr).CharacterAdded, function()
         self.BurningChrs[chr]._trove:Destroy() -- make sure all connections are properly cleaned up
@@ -93,12 +97,7 @@ function Volcano:Burn(chr)
     self.BurningChrs[chr]._trove:Connect(self.BurningChrs[chr].TurnBlackTweens[1].Completed, function(playbackState) -- get random tween (since they all finish at the same time)
         if playbackState == Enum.PlaybackState.Completed then -- if not paused or cancelled
             task.wait(self.Config.ChangeInterval)            
-            for _, part in ipairs(chr:GetDescendants()) do
-                if not part:IsA("BasePart") then continue end
-                part.Anchored = true
-            end
-            chr.Head.Neck:Destroy()
-            --chr.Humanoid:TakeDamage(chr.Humanoid.Health)
+            self:KillChr(chr)
         end
     end)
 

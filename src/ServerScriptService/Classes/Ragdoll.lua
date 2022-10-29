@@ -121,23 +121,30 @@ function Ragdoll:Toggle(enable)
 		-- legs tended to remain stuck together, so seperate them using force for better vfx (or maybe try using the motor6ds in the future)
 		self._vfTrove:Clean()
 
-		local vfLeft = Instance.new("VectorForce")
-		vfLeft.Attachment0 = chr.LeftUpperLeg.RagdollAtt0
-		vfLeft.Force = Vector3.new(-500, 0, 0)
-		vfLeft.Parent = chr.LeftUpperLeg
-		self._vfTrove:Add(vfLeft)
-	
-		local vfRight = Instance.new("VectorForce")
-		vfRight.Attachment0 = chr.RightUpperLeg.RagdollAtt0
-		vfRight.Force = Vector3.new(500, 0, 0)
-		vfRight.Parent = chr.RightUpperLeg
-		self._vfTrove:Add(vfRight)
-	
-		task.delay(0.2, function()
-			self._vfTrove:Remove(vfLeft)
-			self._vfTrove:Remove(vfRight)
-		end)
+		if chr.LeftUpperLeg then
+			local vfLeft = Instance.new("VectorForce")
+			vfLeft.Attachment0 = chr.LeftUpperLeg.RagdollAtt0
+			vfLeft.Force = Vector3.new(-500, 0, 0)
+			vfLeft.Parent = chr.LeftUpperLeg
+			self._vfTrove:Add(vfLeft)	
 
+			task.delay(0.2, function()
+				self._vfTrove:Remove(vfLeft)
+			end)	
+		end
+	
+		if chr.RightUpperLeg then
+			local vfRight = Instance.new("VectorForce")
+			vfRight.Attachment0 = chr.RightUpperLeg.RagdollAtt0
+			vfRight.Force = Vector3.new(500, 0, 0)
+			vfRight.Parent = chr.RightUpperLeg
+			self._vfTrove:Add(vfRight)
+
+			task.delay(0.2, function()
+				self._vfTrove:Remove(vfRight)
+			end)
+		end
+	
 		game.Workspace.CurrentCamera.CameraSubject = chr.UpperTorso -- hrp tends to move a lot more in weird ways than uppertorso
 	else
 		game.Workspace.CurrentCamera.CameraSubject = chr.Humanoid

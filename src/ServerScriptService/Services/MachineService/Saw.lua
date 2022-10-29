@@ -15,6 +15,14 @@ Saw.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Saw")
 }
 
+Saw.JointWhitelist = {
+    "LeftHip",
+    "RightHip",
+    "Waist",
+    "LeftShoulder",
+    "RightShoulder"
+}
+
 function Saw:GetSawList()
     local saws = {}
 
@@ -45,7 +53,7 @@ function Saw:Enable()
                 if not plr then return end
                 
                 for _, motor6d in ipairs(part:GetChildren()) do
-                    if not motor6d:IsA("Motor6D") then continue end
+                    if not motor6d:IsA("Motor6D") or not table.find(self.JointWhitelist, motor6d.Name) then continue end
 
                     if not motor6d.Enabled then
                         local socketJoint = part.Parent.RagdollJoints:FindFirstChild(motor6d.Name)
@@ -56,6 +64,10 @@ function Saw:Enable()
                     end
 
                     motor6d:Destroy()
+
+                    if motor6d.Name == "Waist" then
+                        chr.Humanoid.Health = 0
+                    end
                 end
             end
         end)
