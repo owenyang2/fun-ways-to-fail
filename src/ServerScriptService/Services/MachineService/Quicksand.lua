@@ -19,10 +19,16 @@ Quicksand.AvailableInstances = {
 }
 
 function Quicksand:StopSink(chr)
-    table.remove(self.SinkingChrs, chr)
+    local pos = table.find(self.SinkingChrs, chr)
+
+    if not pos then return end
+
+    table.remove(self.SinkingChrs, pos)
 end
 
 function Quicksand:KillChr(chr)
+    if not table.find(self.SinkingChrs, chr) then return end
+
     self:StopSink(chr)
 
     for _, part in ipairs(chr:GetDescendants()) do
@@ -33,12 +39,12 @@ function Quicksand:KillChr(chr)
 end
 
 function Quicksand:Sink(chr)
-    if table.find(self.SinkingChrs, chr) then return end
+    if table.find(self.SinkingChrs, chr) or chr.Humanoid.Health == 0 then return end
     table.insert(self.SinkingChrs, chr)
 end
 
 function Quicksand:Enable()
-    CollectionService:AddTag(self.Instance.Lava, QuicksandTag)
+    CollectionService:AddTag(self.Instance.Quicksand, QuicksandTag)
 
     local chrTbl = {}
 
@@ -50,7 +56,7 @@ function Quicksand:Enable()
         for _, part in ipairs(parts) do
             local chr = part.Parent
             local plr = game.Players:GetPlayerFromCharacter(chr)
-            if not plr or table.find(doneChrs, chr) then return end
+            if not plr or table.find(doneChrs, chr) or chr.Humanoid.Health == 0 then return end
             
             table.insert(doneChrs, chr)
 
@@ -58,7 +64,7 @@ function Quicksand:Enable()
 
             chrTbl[chr].StayLength += dt
 
-            if chrTbl[chr].StayLength > self.Config.BurnDelay then
+            if chrTbl[chr].StayLength > self.Config.SinkDelay then
                 task.spawn(function() -- prevent thread pausing
                     self:Sink(chr)
                 end)

@@ -42,7 +42,7 @@ function Quicksand:Sink()
     linearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
     linearVelocity.LineDirection = Vector3.new(0, 1, 0)
     linearVelocity.MaxForce = 100000
-    linearVelocity.LineVelocity = -0.7
+    linearVelocity.LineVelocity = -self.SinkVelocity
     linearVelocity.Attachment0 = self.Player.Character.HumanoidRootPart.RootRigAttachment
     linearVelocity.Parent = chr
 
@@ -101,6 +101,7 @@ function Quicksand:Start()
     self.RagdollController = Knit.GetController("RagdollController")
     self.Sinking = false
     self._trove = Trove.new()
+    self.SinkVelocity = self.Instance:GetAttribute("SinkVelocity") or 0.7
 end
 
 return Quicksand
