@@ -52,7 +52,9 @@ function MachineService:KnitStart()
         script.Volcano,
         script.Hole,
         script.Saw,
-        script.Quicksand
+        script.Quicksand,
+        script.Cooking,
+        script.Potion,
     } -- modules that can be required
 
     self:SetupMachines()

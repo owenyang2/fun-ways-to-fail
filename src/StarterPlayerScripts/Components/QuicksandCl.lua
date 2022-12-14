@@ -74,7 +74,7 @@ end
 
 function Quicksand:HeartbeatUpdate(dt)
     -- if player touches quicksand, start sinking them
-    if self.Sinking or not self.Player.Character or self.Player.Character.Humanoid.Health == 0 then return end
+    if self.Sinking or not self.Player.Character or not self.Player.Character:FindFirstChild("Humanoid") or self.Player.Character.Humanoid.Health == 0 then return end
 
     local parts = game.Workspace:GetPartsInPart(self.Instance, MachineFuncs.GetHitboxParams())
 
