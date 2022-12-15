@@ -15,6 +15,48 @@ Potion.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Potion")
 }
 
+function Potion:Drink(plr)
+    local colors = {
+        Color3.fromRGB(255, 242, 0),
+        Color3.fromRGB(22, 172, 22),
+        Color3.fromRGB(255, 0 , 0)
+    }
+    --local num = math.random(1, 3)
+    local num = 3
+    
+    if num == 1 then
+        plr.Character.Humanoid.BodyDepthScale.Value = 0.8
+        plr.Character.Humanoid.BodyHeightScale.Value = 0.8
+        plr.Character.Humanoid.BodyWidthScale.Value = 0.8
+        plr.Character.Humanoid.HeadScale.Value = 2
+    elseif num == 2 then
+        plr.Character.RagdollJoints.LeftShoulder.Enabled = true
+        plr.Character.RagdollJoints.RightShoulder.Enabled = true
+        plr.Character.RagdollJoints.LeftShoulder:SetAttribute("CantEdit", true)
+        plr.Character.RagdollJoints.RightShoulder:SetAttribute("CantEdit", true)
+    else
+        plr.Character.Humanoid.WalkSpeed = 40
+        
+        task.spawn(function()
+            while plr.Character.Humanoid.Health > 0 do
+                plr.Character.Humanoid.Health -= 1
+                print(plr.Character.Humanoid.Health)
+                task.wait(0.1)
+            end
+        end)
+    end
+
+    local color = colors[num]
+
+    local bc = plr.Character["Body Colors"]
+    bc.HeadColor3 = color
+    bc.LeftArmColor3 = color
+    bc.LeftLegColor3 = color
+    bc.RightArmColor3 = color
+    bc.RightLegColor3 = color
+    bc.TorsoColor3 = color
+end
+
 function Potion:Start()
     self.Instance.Potion.ProximityPrompt.Triggered:Connect(function(plr)
         local newPotion = RepStorage.Assets.Potion:Clone()
@@ -27,6 +69,13 @@ function Potion:Start()
         newWeld.Part0 = newPotion
         newWeld.Part1 = plr.Character.RightHand
         newWeld.Parent = newPotion
+
+        task.wait(1)
+
+        newPotion:Destroy()
+        newWeld:Destroy()
+
+        self:Drink(plr)
     end)
 end
 

@@ -110,10 +110,14 @@ function Ragdoll:Toggle(enable)
 	chr.HumanoidRootPart.Massless = enable
 	
 	for _, motor in ipairs(self.Motor6DJoints) do
+		if motor:GetAttribute("DontEdit") then continue end
+		
 		motor.Enabled = not enable
 	end
 
 	for _, ragdollJoint in ipairs(self.RagdollJoints) do
+		if ragdollJoint:GetAttribute("DontEdit") then continue end
+
 		ragdollJoint.Enabled = enable
 	end
 
