@@ -55,6 +55,7 @@ function MachineService:KnitStart()
         script.Quicksand,
         script.Cooking,
         script.Potion,
+        script.Food
     } -- modules that can be required
 
     self:SetupMachines()
