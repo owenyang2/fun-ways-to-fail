@@ -11,12 +11,14 @@ local TableUtil = require(RepStorage.Packages.TableUtil)
 
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
+local MachineFolder = game.Workspace.PlaceModels["Frozen Lake"]
+
 IceLake.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Frozen Lake")
 }
 
 function IceLake:Start()
-
+    
 end
 
 function IceLake.new(baseTbl)
@@ -25,9 +27,16 @@ function IceLake.new(baseTbl)
 
     local self = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
-        
+        IceParts = {},
+
         _trove = Trove.new()
     }), IceLake)
+
+    for _, ice in ipairs(MachineFolder:GetChildren()) do
+        if ice.Name == "Ice" then
+            table.insert(self.IceParts, ice)
+        end
+    end
 
     return self
 end
