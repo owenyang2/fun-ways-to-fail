@@ -19,11 +19,9 @@
       }
     },
 
-    "StarterPlayer": {
-      "StarterPlayerScripts": {
-        "Client": {
-          "$path": "src/StarterPlayerScripts"
-        }
+    "StarterPlayerScripts": {
+      "Client": {
+        "$path": "src/StarterPlayerScripts"
       }
     }
   }
