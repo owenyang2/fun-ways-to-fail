@@ -17,8 +17,51 @@ IceLake.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Frozen Lake")
 }
 
-function IceLake:Start()
+local function getOverlapParams()
+    local op = OverlapParams.new()
+    op.FilterType = Enum.RaycastFilterType.Whitelist
+
+    local t = {}
+
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        table.insert(t, plr.Character)
+    end
+
+    op.FilterDescendantsInstances = t
     
+    return op
+end
+
+function IceLake:Start()
+    RunService.Heartbeat:Connect(function(dt)
+        for ice, _ in pairs(self.IceParts) do
+            if table.find(self.Fallen, ice) then
+                self.IceParts[ice] += dt
+
+                if self.IceParts[ice] < self.Presets.RespawnTime then continue end
+                
+                self.IceParts[ice] = 0
+                ice.Transparency = 0.5
+                ice.CanCollide = true
+                table.remove(self.Fallen, table.find(self.Fallen, ice))
+            else
+                local parts = workspace:GetPartsInPart(ice, getOverlapParams())
+                print(parts)
+                if #parts > 0 then
+                    self.IceParts[ice] += dt
+                    print(self.IceParts[ice])
+                    if self.IceParts[ice] >= self.Presets.FallDelay then
+                        self.IceParts[ice] = 0
+                        ice.Transparency = 1
+                        ice.CanCollide = false
+                        table.insert(self.Fallen, ice)    
+                    end
+                else
+                    self.IceParts[ice] = 0
+                end
+            end
+        end
+    end)
 end
 
 function IceLake.new(baseTbl)
@@ -28,15 +71,22 @@ function IceLake.new(baseTbl)
     local self = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         IceParts = {},
+        Fallen = {},
+        Presets = {
+            FallDelay = 1,
+            RespawnTime = 10,
+        },
 
         _trove = Trove.new()
     }), IceLake)
 
     for _, ice in ipairs(MachineFolder:GetChildren()) do
         if ice.Name == "Ice" then
-            table.insert(self.IceParts, ice)
+            self.IceParts[ice] = 0
         end
     end
+
+    self:Start()
 
     return self
 end
