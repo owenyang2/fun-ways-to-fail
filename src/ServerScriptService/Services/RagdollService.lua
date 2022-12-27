@@ -1,4 +1,5 @@
 local RepStorage = game:GetService("ReplicatedStorage")
+local PhysicsService = game:GetService("PhysicsService")
 
 local Ragdoll = require(script.Parent.Parent.Classes.Ragdoll)
 
@@ -61,9 +62,20 @@ end
 function RagdollService:KnitStart()
     self.ProfileManager = Knit.GetService("ProfileManager")
     
+    local COLLISION_GROUP = "Players"
+    PhysicsService:CreateCollisionGroup(COLLISION_GROUP)
+
     game.Players.PlayerAdded:Connect(function(plr)
         local ragdoll = Ragdoll.new(plr)
         ragdoll:Toggle(true)
+
+        plr.CharacterAdded:Connect(function(chr)
+            for _, part in ipairs(chr:GetDescendants()) do
+                if not part:IsA("BasePart") then continue end
+                
+                PhysicsService:SetPartCollisionGroup(part, COLLISION_GROUP)
+            end
+        end)
     end)
     
     game.Players.PlayerRemoving:Connect(function(plr)
