@@ -23,59 +23,40 @@ function Rocket:Start()
         if plr then
             local realRocket = self.Instance.Rocket
 
-            local rocketModel = realRocket:Clone()
-            rocketModel.Name = "FakeRocket"
-            rocketModel.Parent = self.Instance
+            local fakeRocket = realRocket:Clone()
+            fakeRocket.Name = "FakeRocket"
+            fakeRocket.Parent = self.Instance
 
-            for _, part in ipairs(realRocket:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Transparency = 1
-                    part.CanCollide = false
-                end
-            end
+            realRocket.Transparency = 1
+            realRocket.CanCollide = false
 
-            chr:SetPrimaryPartCFrame(rocketModel.PrimaryPart.CFrame)
+            chr:SetPrimaryPartCFrame(fakeRocket.CFrame)
 
             local chrWeld = Instance.new("WeldConstraint")
             chrWeld.Part0 = chr.PrimaryPart
-            chrWeld.Part1 = rocketModel.PrimaryPart
-            chrWeld.Parent = rocketModel
+            chrWeld.Part1 = fakeRocket
+            chrWeld.Parent = fakeRocket
 
             task.wait(self.DelayTime)
 
-            rocketModel.PrimaryPart.Anchored = false
-            rocketModel.PrimaryPart.CanCollide = false
+            fakeRocket.Anchored = false
+            fakeRocket.CanCollide = false
 
-            for _, rocketPart in ipairs(rocketModel:GetChildren()) do
-                if not rocketPart:IsA("BasePart") or rocketPart == rocketModel.PrimaryPart then continue end
-                rocketPart.Anchored = false
-                rocketPart.CanCollide = false
-
-                local weld = Instance.new("WeldConstraint")
-                weld.Part0 = rocketModel.PrimaryPart
-                weld.Part1 = rocketPart
-                weld.Parent = rocketPart
-            end
-
-            local att = Instance.new("Attachment", rocketModel.PrimaryPart)
+            local att = Instance.new("Attachment", fakeRocket)
 
             local launchVelo = Instance.new("LinearVelocity")
             launchVelo.Attachment0 = att
             launchVelo.MaxForce = math.huge
             launchVelo.VectorVelocity = self.LaunchVelo
-            launchVelo.Parent = rocketModel.PrimaryPart
+            launchVelo.Parent = fakeRocket
 
             chr.Humanoid.WalkSpeed = 0
             chr.Humanoid.JumpHeight = 0
 
             task.wait(self.FlyTime)
 
+            fakeRocket.Anchored = true
             launchVelo:Destroy()
-            for _, obj in ipairs(rocketModel:GetDescendants()) do
-                if obj:IsA("BasePart") then
-                    obj.Anchored = true
-                end
-            end
             chrWeld:Destroy()
 
             local plrNoGrav = Instance.new("LinearVelocity")
@@ -96,16 +77,12 @@ function Rocket:Start()
             kTween:Play()
 
             task.wait(self.KillInfo.Time + 3)
-            rocketModel:Destroy()
+            fakeRocket:Destroy()
 
             -- reset
 
-            for _, part in ipairs(realRocket:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.Transparency = 0
-                    part.CanCollide = true
-                end
-            end
+            realRocket.CanCollide = true
+            realRocket.Transparency = 0
         end
     end)
 end
