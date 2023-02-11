@@ -2,6 +2,7 @@ local Ragdoll = {}
 Ragdoll.__index = Ragdoll
 
 local RepStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 
 local Trove = require(RepStorage.Packages.Trove)
 
@@ -168,12 +169,13 @@ end
 function Ragdoll:Setup()
 	self._trove:Connect(self.Player.CharacterAdded, function(chr) -- should be disconnected when cleaned up
 		self:EditCanRagdoll(true)
-		self:CreateJoints()
 		chr.Humanoid.BreakJointsOnDeath = false
 		self._trove:Connect(chr.Humanoid.Died, function() -- setup ragdoll on death
 			self:Toggle(true)
 			self:EditCanRagdoll(false)
 		end)
+		RunService.Heartbeat:Wait()--ragdoll attachments being auto destroyed on diff packages, maybe default roblox behaviour?
+		self:CreateJoints()
 	end)
 end
 
