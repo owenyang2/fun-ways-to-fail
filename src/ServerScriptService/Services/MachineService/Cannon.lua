@@ -17,8 +17,13 @@ Cannon.AvailableInstances = {
 
 function Cannon:Start()
     self.Instance.CannonLauncher.Enter.Triggered:Connect(function(plr)
-        plr.Character:SetPrimaryPartCFrame(CFrame.new(self.Instance.LaunchPart.Position))
-        
+        plr.Character:SetPrimaryPartCFrame(self.Instance.LaunchPart.CFrame)
+        plr.Character.HumanoidRootPart.Anchored = true
+
+        task.wait(self.LaunchDelay)
+
+        plr.Character.HumanoidRootPart.Anchored = false
+
         local ragdoll = Ragdoll.GlobalRagdolls[plr]
         ragdoll:Toggle(true)
         ragdoll:EditCanRagdoll(false)
@@ -60,6 +65,7 @@ function Cannon.new(baseTbl)
         Instance = newInst,
         LaunchForce = Vector3.new(-100, 150, 0),
         LaunchTime = 1,
+        LaunchDelay = 1,
         KillTime = 3,
 
         _trove = Trove.new()
