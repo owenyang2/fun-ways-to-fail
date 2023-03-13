@@ -58,7 +58,8 @@ function MachineService:KnitStart()
         script.Food,
         script.IceLake,
         script.Rocket,
-        script.Cannon
+        script.Cannon,
+        script.Piranhas
     } -- modules that can be required
 
     self:SetupMachines()
