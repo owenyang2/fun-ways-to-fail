@@ -59,12 +59,14 @@ function RagdollService:SetupSignals()
     end)
 end
 
+function RagdollService:KnitInit()
+    self.COLLISION_GROUP = "Players"
+    PhysicsService:CreateCollisionGroup(self.COLLISION_GROUP)
+end
+
 function RagdollService:KnitStart()
     self.ProfileManager = Knit.GetService("ProfileManager")
     
-    local COLLISION_GROUP = "Players"
-    PhysicsService:CreateCollisionGroup(COLLISION_GROUP)
-
     game.Players.PlayerAdded:Connect(function(plr)
         local ragdoll = Ragdoll.new(plr)
         ragdoll:Toggle(true)
@@ -73,7 +75,7 @@ function RagdollService:KnitStart()
             for _, part in ipairs(chr:GetDescendants()) do
                 if not part:IsA("BasePart") then continue end
                 
-                PhysicsService:SetPartCollisionGroup(part, COLLISION_GROUP)
+                PhysicsService:SetPartCollisionGroup(part, self.COLLISION_GROUP)
             end
         end)
     end)
