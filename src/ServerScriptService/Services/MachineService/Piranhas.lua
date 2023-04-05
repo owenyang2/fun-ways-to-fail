@@ -1,15 +1,14 @@
 local Piranhas = {}
 Piranhas.__index = Piranhas
 
-local PiranhaClass = require(script.Parent.Parent.Classes.PiranhaClass)
-
 local RepStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
+
+local PiranhaClass = require(ServerScriptService.Server.Classes.PiranhaClass)
 
 Piranhas.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Piranhas")
@@ -30,22 +29,6 @@ end
 
 function Piranhas:Start()
     self:SpawnPiranhas()
-
-    self._trove:Connect(RunService.Heartbeat, function(dt) -- in the future, maybe use perlin noise to make fish swim left/right, up/down random
-        for _, p in ipairs(self.Piranhas) do
-            if p.Deg == 360 then
-                p.Deg = 0
-            end
-
-            local x = p.Radius * math.cos(math.rad(p.Deg))
-            local z = p.Radius * math.sin(math.rad(p.Deg))
-
-            p.AlignPosition.Position = self.Instance.Water.Position + Vector3.new(-x, 0, -z) + p.Offset
-            p.AlignOrientation.CFrame = CFrame.Angles(0, math.rad(-p.Deg), 0)
-            
-            p.Deg += p.DegInc
-        end
-    end)
 end
 
 function Piranhas.new(baseTbl)
