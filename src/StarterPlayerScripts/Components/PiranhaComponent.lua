@@ -1,11 +1,15 @@
-local PiranhaClass = {}
-PiranhaClass.__index = PiranhaClass
-
 local RepStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
+local Knit = require(RepStorage.Packages.Knit)
+local Component = require(RepStorage.Packages.Component)
+local MachineFuncs = require(RepStorage.Common.MachineFunctions)
 local Trove = require(RepStorage.Packages.Trove)
+
+local Piranha = Component.new {
+    Tag = "Piranha"
+}
 
 local function getOverlapParams()
     local op = OverlapParams.new()
@@ -22,7 +26,7 @@ local function getOverlapParams()
     return op
 end
 
-function PiranhaClass:TargetMovement()
+function Piranha:TargetMovement()
     self.Instance.AlignPosition.Enabled = false
     self.Instance.AlignOrientation.Enabled = false
 
@@ -34,7 +38,7 @@ function PiranhaClass:TargetMovement()
     end)
 end
 
-function PiranhaClass:DefaultMovement()
+function Piranha:DefaultMovement()
     self._trove:Connect(RunService.Heartbeat, function(dt) -- in the future, maybe use perlin noise to make fish swim left/right, up/down random
         if self.DefaultBehaviour.Deg == 360 then
             self.DefaultBehaviour.Deg = 0
@@ -65,33 +69,27 @@ function PiranhaClass:DefaultMovement()
     end)
 end
 
-function PiranhaClass:Setup()
+function Piranha:Setup()
     self:DefaultMovement()
 end
 
-function PiranhaClass.new(part, parentInst)
-	local self = setmetatable({
-        DefaultBehaviour = {
-            Radius = math.random(40, 45),
-            Deg = math.random(0, 359),
-            DegInc = math.random(50, 150) / 100,
-            Offset = Vector3.new(math.random(-50, 50), math.random(-2, 2), math.random(-50, 50))
-        },
+function Piranha:Start(part, parentInst)
+    self.ParentInst = game.Workspace.PlaceModels.Piranhas
+    self.DefaultBehaviour = {
+        Radius = math.random(40, 45),
+        Deg = math.random(0, 359),
+        DegInc = math.random(50, 150) / 100,
+        Offset = Vector3.new(math.random(-50, 50), math.random(-2, 2), math.random(-50, 50))
+    }
 
-        FollowBehaviour = {
-            DetectionRad = 10,
-            FollowingPlr = nil,
-            TweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
-        },
-
-        Instance = part,
-        ParentInst = parentInst,
-        _trove = Trove.new()
-    }, PiranhaClass)
+    self.FollowBehaviour = {
+        DetectionRad = 10,
+        FollowingPlr = nil,
+        TweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+    }
+    self._trove = Trove.new()
 
 	self:Setup()
-
-	return self
 end
 
-return PiranhaClass
+return Piranha
