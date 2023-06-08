@@ -42,6 +42,7 @@ function MachineService:SetupMachines()
         local newMachine = require(module).new({
             MachineFuncs = MachineFunctions
         }) 
+        print(module.Name)
         newMachine:Start()
     end
 end

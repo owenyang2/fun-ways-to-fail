@@ -12,7 +12,7 @@ local TableUtil = require(RepStorage.Packages.TableUtil)
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
 AppleTree.AvailableInstances = {
-    game.Workspace.PlaceModels:FindFirstChild("Apple")
+    game.Workspace.PlaceModels:FindFirstChild("AppleTree")
 }
 
 local function getOverlapParams()
@@ -31,20 +31,35 @@ local function getOverlapParams()
 end
 
 function AppleTree:KillChr(chr)
-    
+    local newApple = RepStorage.Assets.Apple:Clone()
+    newApple.Parent = self.Instance
+
+    local newTrove = Trove.new()
+
+    newTrove:Connect(RunService.Heartbeat, function()
+        newApple.AlignPosition.Position = chr.HumanoidRootPart.Position
+        if not chr:FindFirstChild("HumanoidRootPart") then
+            newTrove:Destroy()
+        elseif (newApple.Position - chr.HumanoidRootPart.Position).Magnitude < 2 then
+            chr.Humanoid.Health = 0
+            newTrove:Destroy()
+        end
+    end)
 end
 
 function AppleTree:Start()
-    self._trove:Connect(RunService.Heatbeat, function()
-        local parts = workspace:GetPartsInPart(self.Hitbox, getOverlapParams())
+    self._trove:Connect(RunService.Heartbeat, function()
+        local parts = workspace:GetPartBoundsInBox(self.Hitbox.CFrame, self.Hitbox.Size, getOverlapParams())
 
         for _, part in ipairs(parts) do
             local chr = part:FindFirstAncestorWhichIsA("Model")
 
-            if table.find(self.Chrs, chr) or game.Players:GetPlayerFromCharacter(chr) then continue end
-            table.insert(self.Chrs, chr)
+            if table.find(self.CurrentChrs, chr) or not game.Players:GetPlayerFromCharacter(chr) then continue end
+            table.insert(self.CurrentChrs, chr)
 
-            self:KillChr(chr)
+            task.spawn(function()
+                self:KillChr(chr)
+            end)
         end
     end)
 end
@@ -65,4 +80,4 @@ function AppleTree.new(baseTbl)
     return self
 end
 
-return Cannon
+return AppleTree
