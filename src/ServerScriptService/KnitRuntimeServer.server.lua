@@ -5,7 +5,7 @@ local Knit = require(RepStorage.Packages.Knit)
 Knit.AddServicesDeep(script.Parent.Services)
 
 local initList = {
-    script.Parent:WaitForChild("Components"),
+    --script.Parent:WaitForChild("Components"),
     --script.Parent.Subroutines,
 }
 

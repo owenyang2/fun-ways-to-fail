@@ -20,8 +20,19 @@ function BasicService.Client:SprintToggle(plr, toggle)
     end
 end
 
+function BasicService:SetupDeathCounter()
+    game.Players.PlayerAdded:Connect(function(plr)
+        plr.CharacterAdded:Connect(function(chr)
+            chr.Humanoid.Died:Connect(function()
+                plr:WaitForChild("leaderstats").Deaths.Value += 1
+            end)
+        end)
+    end)
+end
+
 function BasicService:KnitStart()
     self.SprintWalkSpeed = 30
+    self:SetupDeathCounter()
 end
 
 return BasicService
