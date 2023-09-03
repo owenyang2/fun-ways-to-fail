@@ -46,11 +46,12 @@ end
 
 function HydraulicPress:Press()
     self._tweens.Press:Play()
+    self._tweens.PressHitbox:Play()
 
     -- TODO: constantly detect player limbs facing up and squish them
     
     self._trove:Connect(RunService.Heartbeat, function(dt)
-        local parts = game.Workspace:GetPartsInPart(self.Instance.Press, self.MachineFuncs.GetHitboxParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance.TopPushHitbox, self.MachineFuncs.GetHitboxParams())
 
         local dirToScale = {
             RightVector = "BodyWidthScale",
@@ -59,10 +60,12 @@ function HydraulicPress:Press()
         }
 
         local doneChrs = {}
+        print(parts)
 
         for _, part in ipairs(parts) do
             local chr = part.Parent
             if not game.Players:GetPlayerFromCharacter(chr) and not table.find(doneChrs, chr) then return end
+            if chr.Humanoid.FloorMaterial == Enum.Material.Air then return end -- if jumping
 
             table.insert(doneChrs, chr)
 
@@ -99,6 +102,7 @@ function HydraulicPress:Press()
     end)
 
     self._tweens.Press.Completed:Wait()
+    self._trove:Clean() -- so don't press after done
 
     task.wait(self.Config.PressTime)
 
@@ -133,8 +137,11 @@ end
 function HydraulicPress:CreateTweens()
     local info = TweenInfo.new(self.Config.LowerTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
+    local pushGoal = self.Instance.Press.CFrame + Vector3.new(0, -9.04, 0)
+
     self._tweens = {
-        Press = TweenService:Create(self.Instance.Press, info, {CFrame = self.Instance.Press.CFrame + Vector3.new(0, -14.75, 0)}), -- -15.27 is fully closed
+        Press = TweenService:Create(self.Instance.Press, info, {CFrame = pushGoal}), 
+        PressHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, {CFrame = pushGoal - Vector3.new(0, self.Instance.Press.Size.Y / 2, 0)}),
         Reset = TweenService:Create(self.Instance.Press, info, {CFrame = self.Instance.Press.CFrame})
     }
 end

@@ -76,7 +76,7 @@ end
 function Piranha:Start(part, parentInst)
     self.ParentInst = game.Workspace.PlaceModels.Piranhas
     self.DefaultBehaviour = {
-        Radius = math.random(40, 45),
+        Radius = math.random(10, 15),
         Deg = math.random(0, 359),
         DegInc = math.random(50, 150) / 100,
         Offset = Vector3.new(math.random(-50, 50), math.random(-2, 2), math.random(-50, 50))
