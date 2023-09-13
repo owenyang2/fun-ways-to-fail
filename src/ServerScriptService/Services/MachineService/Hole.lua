@@ -41,7 +41,7 @@ function Hole:Enable()
             table.insert(doneChrs, chr)
             
             task.spawn(function()
-                if table.find(part, parts) then
+                if table.find(parts, part) then
                     self:StartFall(plr)
                 else
                     self:KillPlr(plr)
