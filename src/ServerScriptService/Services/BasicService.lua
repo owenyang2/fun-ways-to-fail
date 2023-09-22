@@ -30,6 +30,18 @@ function BasicService:SetupDeathCounter()
     end)
 end
 
+function BasicService.Client:GetLClothingSize(plr)
+    local sizes = {}
+
+    for _, clothing in ipairs(plr.Character:GetChildren()) do
+        if clothing:IsA("Accessory") then
+            sizes[clothing.Name] = clothing.Handle.Size
+        end
+    end
+
+    return sizes
+end
+
 function BasicService:KnitStart()
     self.SprintWalkSpeed = 30
     self:SetupDeathCounter()

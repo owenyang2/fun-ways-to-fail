@@ -80,7 +80,6 @@ function HydraulicPress:Press()
         }
 
         local doneChrs = {}
-        print(parts)
 
         for _, part in ipairs(parts) do
             local chr = part.Parent
@@ -133,6 +132,7 @@ end
 
 function HydraulicPress:Reset()
     self._tweens.Reset:Play()
+    self._tweens.ResetHitbox:Play()
     self._tweens.Reset.Completed:Wait()
 
     self:ChangeState("Idle")
