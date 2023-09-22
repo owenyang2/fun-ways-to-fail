@@ -44,6 +44,26 @@ function HydraulicPress:Idle()
     end)
 end
 
+function HydraulicPress:KillSquishedPlrs()
+    local parts = game.Workspace:GetPartsInPart(self.Instance.TopPushHitbox, self.MachineFuncs.GetHitboxParams())
+
+    print(parts)
+
+    local doneChrs = {}
+
+    for _, part in ipairs(parts) do
+        local chr = part.Parent
+        if not game.Players:GetPlayerFromCharacter(chr) and not table.find(doneChrs, chr) then return end
+        if chr.Humanoid.FloorMaterial == Enum.Material.Air then return end -- if jumping
+
+        table.insert(doneChrs, chr)
+
+        chr.Humanoid.BodyHeightScale.Value = 0
+        chr.Humanoid.HeadScale.Value = 0
+        chr.Humanoid.Health = 0
+    end
+end
+
 function HydraulicPress:Press()
     self._tweens.Press:Play()
     self._tweens.PressHitbox:Play()
@@ -104,6 +124,8 @@ function HydraulicPress:Press()
     self._tweens.Press.Completed:Wait()
     self._trove:Clean() -- so don't press after done
 
+    self:KillSquishedPlrs()
+
     task.wait(self.Config.PressTime)
 
     self:ChangeState("Resetting")
@@ -137,12 +159,14 @@ end
 function HydraulicPress:CreateTweens()
     local info = TweenInfo.new(self.Config.LowerTime, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
 
-    local pushGoal = self.Instance.Press.CFrame + Vector3.new(0, -9.04, 0)
+    local pushGoal = self.Instance.Press.CFrame + self.Config.PressHitboxOffset
 
     self._tweens = {
         Press = TweenService:Create(self.Instance.Press, info, {CFrame = pushGoal}), 
         PressHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, {CFrame = pushGoal - Vector3.new(0, self.Instance.Press.Size.Y / 2, 0)}),
-        Reset = TweenService:Create(self.Instance.Press, info, {CFrame = self.Instance.Press.CFrame})
+        
+        Reset = TweenService:Create(self.Instance.Press, info, {CFrame = self.Instance.Press.CFrame}),
+        ResetHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, {CFrame = self.Instance.TopPushHitbox.CFrame}),
     }
 end
 
@@ -162,7 +186,9 @@ function HydraulicPress.new(baseTbl)
             LowerTime = 5,
             PressTime = 1,
 
-            PressLimit = 0.2
+            PressLimit = 0.2,
+
+            PressHitboxOffset = Vector3.new(0, -9.04, 0)
         }
     }), HydraulicPress)
 
