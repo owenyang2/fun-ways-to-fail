@@ -30,16 +30,15 @@ function BasicController:SetupLClothing()
     -- layered clothing doesn't scale properly when modifying bodyscale on server, 
     -- thus if one changed get correct layered clothing size and replicate to client
 
+    -- nvm this isn't really needed as roblox replication has same size but different visual
+
     local function propertyChanged()
         print("detected prop change")
         local sizes = self.BasicService:GetLClothingSize()
 
-        print(sizes)
-
         for name, size in pairs(sizes) do
             local acc = self.Player.Character:FindFirstChild(name)
 
-            print(acc)
             if acc and acc.Handle.Size ~= size then
                 acc.Handle.Size = size
                 print("changed")
@@ -62,7 +61,6 @@ function BasicController:KnitStart()
     self._trove = Trove.new()
 
     self:SetupInput()
-    self:SetupLClothing()
 end
 
 return BasicController

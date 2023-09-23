@@ -52,16 +52,32 @@ function HydraulicPress:KillSquishedPlrs()
     local doneChrs = {}
 
     for _, part in ipairs(parts) do
-        local chr = part.Parent
+        local chr = part:FindFirstAncestorOfClass("Model")
         if not game.Players:GetPlayerFromCharacter(chr) and not table.find(doneChrs, chr) then return end
         if chr.Humanoid.FloorMaterial == Enum.Material.Air then return end -- if jumping
 
         table.insert(doneChrs, chr)
 
-        chr.Humanoid.BodyHeightScale.Value = 0
-        chr.Humanoid.HeadScale.Value = 0
+        chr.Humanoid.HumanoidDescription.HeadScale = 0 -- completely make head disappear for better visual
+        chr.Humanoid:ApplyDescription(chr.Humanoid.HumanoidDescription)
+        print("kill")
         chr.Humanoid.Health = 0
     end
+end
+
+function HydraulicPress:GetChrFacingDir(chr)
+    local current = {}
+
+    for _, dir in ipairs({"LookVector", "UpVector", "RightVector"}) do
+        local yAmt = math.abs(chr.UpperTorso.CFrame[dir].Y) -- how much the part's face is facing up, use abs in case is facing down
+
+        if current.Dir == nil or current.Amt < yAmt then
+            current.Amt = yAmt
+            current.Dir = dir
+        end
+    end
+
+    return current.Dir
 end
 
 function HydraulicPress:Press()
@@ -73,50 +89,35 @@ function HydraulicPress:Press()
     self._trove:Connect(RunService.Heartbeat, function(dt)
         local parts = game.Workspace:GetPartsInPart(self.Instance.TopPushHitbox, self.MachineFuncs.GetHitboxParams())
 
-        local dirToScale = {
-            RightVector = "BodyWidthScale",
-            UpVector = "BodyHeightScale",
-            LookVector = "BodyDepthScale",
-        }
-
         local doneChrs = {}
 
         for _, part in ipairs(parts) do
-            local chr = part.Parent
-            if not game.Players:GetPlayerFromCharacter(chr) and not table.find(doneChrs, chr) then return end
-            if chr.Humanoid.FloorMaterial == Enum.Material.Air then return end -- if jumping
+            local chr = part:FindFirstAncestorOfClass("Model")
+            if not game.Players:GetPlayerFromCharacter(chr) and not table.find(doneChrs, chr) then print("a") return end
+            if chr.Humanoid.FloorMaterial == Enum.Material.Air then print("b") return end -- if jumping
 
             table.insert(doneChrs, chr)
 
-            local current = {}
+            local dir = self:GetChrFacingDir(chr)
+            local property = self.DirToScale[dir]
 
-            for _, dir in ipairs({"LookVector", "UpVector", "RightVector"}) do
-                local yAmt = math.abs(chr.UpperTorso.CFrame[dir].Y) -- how much the part's face is facing up, use abs in case is facing down
+            if chr.Humanoid.HumanoidDescription[property] - self.Config.PressSizeDecrease > self.Config.PressLimit then
+                print(chr.Humanoid.HumanoidDescription[property])
+                chr.Humanoid.HumanoidDescription[property] -= self.Config.PressSizeDecrease
+            else
+                chr.Humanoid.HumanoidDescription[property] = self.Config.PressLimit
+            end
 
-                if current.Dir == nil or current.Amt < yAmt then
-                    current.Amt = yAmt
-                    current.Dir = dir
+            local least = math.huge
+
+            for _, scale in pairs(self.DirToScale) do -- get averages of scaled down proportions to set head to
+                if chr.Humanoid.HumanoidDescription[scale] < least then
+                    least = chr.Humanoid.HumanoidDescription[scale]
                 end
             end
 
-            local dir = current.Dir
-            local scaleVal = chr.Humanoid:FindFirstChild(dirToScale[dir])
-
-            if scaleVal.Value - self.Config.PressSizeDecrease > self.Config.PressLimit then
-                scaleVal.Value -= self.Config.PressLimit
-            else
-                scaleVal.Value = self.Config.PressLimit
-            end
-
-            local average = 0
-
-            for _, scale in pairs(dirToScale) do -- get averages of scaled down proportions to set head to
-                average += chr.Humanoid:FindFirstChild(scale).Value
-            end
-
-            average /= 3
-
-            chr.Humanoid:FindFirstChild("HeadScale").Value = average
+            chr.Humanoid.HumanoidDescription.HeadScale = least
+            chr.Humanoid:ApplyDescription(chr.Humanoid.HumanoidDescription)
         end
     end)
 
@@ -163,7 +164,9 @@ function HydraulicPress:CreateTweens()
 
     self._tweens = {
         Press = TweenService:Create(self.Instance.Press, info, {CFrame = pushGoal}), 
-        PressHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, {CFrame = pushGoal - Vector3.new(0, self.Instance.Press.Size.Y / 2, 0)}),
+        PressHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, 
+            {CFrame = pushGoal - Vector3.new(0, self.Instance.TopPushHitbox.Size.Y, 0) - Vector3.new(0, self.Instance.Press.Size.Y / 2, 0)}
+        ),
         
         Reset = TweenService:Create(self.Instance.Press, info, {CFrame = self.Instance.Press.CFrame}),
         ResetHitbox = TweenService:Create(self.Instance.TopPushHitbox, info, {CFrame = self.Instance.TopPushHitbox.CFrame}),
@@ -180,13 +183,19 @@ function HydraulicPress.new(baseTbl)
         
         _trove = Trove.new(),
 
+        DirToScale = {
+            RightVector = "WidthScale",
+            UpVector = "HeightScale",
+            LookVector = "DepthScale",
+        },
+
         Config = {
             MinPressAmt = 0.5, -- minimum lookvector component magnitude to compress that part's appropriate size
-            PressSizeDecrease = 0.001, -- by how many studs should the part being pressed shrink
+            PressSizeDecrease = 0.005, -- by how many studs should the part being pressed shrink
             LowerTime = 5,
             PressTime = 1,
 
-            PressLimit = 0.2,
+            PressLimit = 0,
 
             PressHitboxOffset = Vector3.new(0, -9.04, 0)
         }
