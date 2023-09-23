@@ -18,21 +18,6 @@ IceLake.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Frozen Lake")
 }
 
-local function getOverlapParams()
-    local op = OverlapParams.new()
-    op.FilterType = Enum.RaycastFilterType.Whitelist
-
-    local t = {}
-
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        table.insert(t, plr.Character)
-    end
-
-    op.FilterDescendantsInstances = t
-    
-    return op
-end
-
 function IceLake:CheckFall(dt)
     for ice, _ in pairs(self.IceParts) do
         local info = self.IceParts[ice]
@@ -51,7 +36,8 @@ function IceLake:CheckFall(dt)
 
             info.Fallen = false
         else
-            local parts = workspace:GetPartsInPart(ice, getOverlapParams())
+            local parts = workspace:GetPartsInPart(info.Hitbox, self.MachineFuncs.GetHitboxParams())
+            
             if #parts > 0 then
                 info.Time += dt
                 if info.Time >= self.Presets.FallDelay then
@@ -75,7 +61,7 @@ function IceLake:CheckFall(dt)
 end
 
 function IceLake:CheckWater()
-    local parts = workspace:GetPartsInPart(self.Instance.FreezingWater, getOverlapParams())
+    local parts = workspace:GetPartsInPart(self.Instance.FreezingWater, self.MachineFuncs.GetHitboxParams())
 
     local didChrs = {}
 
@@ -193,14 +179,27 @@ function IceLake.new(baseTbl)
 
     for _, ice in ipairs(MachineFolder:GetChildren()) do
         if ice.Name == "Ice" then
-            self.IceParts[ice] = {Time = 0, FakeIce = nil, Fallen = false}
+            local hitbox = ice:Clone()
+            hitbox.Transparency = 1
+            hitbox.CanCollide = false
+            hitbox.Anchored = true
+
+            hitbox.Name = "Hitbox"
+            hitbox.Size = hitbox.Size + Vector3.new(0, 2, 0)
+            hitbox.Parent = ice
+
+            self.IceParts[ice] = {Time = 0, Hitbox = hitbox, FakeIce = nil, Fallen = false}        
+        end
+        
+        --[[ -- from previous ice lake model
         elseif ice.Name == "Snow" then
             PhysicsService:SetPartCollisionGroup(ice, "Snow")
         end
+        --]]
     end
 
     PhysicsService:CollisionGroupSetCollidable(self.COLLISION_GROUP, "Players", false)
-    PhysicsService:CollisionGroupSetCollidable(self.COLLISION_GROUP, "Snow", false)
+    --PhysicsService:CollisionGroupSetCollidable(self.COLLISION_GROUP, "Snow", false) -- now obsolete
 
     self:Start()
 

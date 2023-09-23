@@ -11,6 +11,7 @@ local BasicController = Knit.CreateController {
 }
 
 function BasicController:SetupInput()
+    print("setuped")
     UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         if gameProcessedEvent then return end
         
@@ -55,12 +56,26 @@ function BasicController:SetupLClothing()
     end)
 end
 
+function BasicController:SetupAnimPlayer()
+    self.BasicService.PlayAnim:Connect(function(id)
+        local chr = self.Player.Character
+        local animator = chr.Humanoid:WaitForChild("Animator")
+    
+        local anim = Instance.new("Animation")
+        anim.AnimationId = id
+    
+        local animTrack = animator:LoadAnimation(anim)
+        animTrack:Play()
+    end)
+end
+
 function BasicController:KnitStart()
     self.BasicService = Knit.GetService("BasicService")
     self.Player = game.Players.LocalPlayer
     self._trove = Trove.new()
 
     self:SetupInput()
+    self:SetupAnimPlayer()
 end
 
 return BasicController

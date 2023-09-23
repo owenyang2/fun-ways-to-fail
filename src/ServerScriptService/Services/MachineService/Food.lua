@@ -8,8 +8,8 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
-local ServerComm = require(RepStorage.Packages.Comm).ServerComm
 
+local ServerComm = require(RepStorage.Packages.Comm).ServerComm
 local serverComm = ServerComm.new(RepStorage, "Food")
 local enlargeSignal = serverComm:CreateSignal("EnlargePlayer")
 

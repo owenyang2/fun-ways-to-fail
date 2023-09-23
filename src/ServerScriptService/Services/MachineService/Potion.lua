@@ -8,6 +8,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
+local Knit = require(RepStorage.Packages.Knit)
 
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
@@ -69,7 +70,9 @@ function Potion:Start()
         newWeld.Part1 = plr.Character.RightHand
         newWeld.Parent = newPotion
 
-        task.wait(1)
+        self.BasicService:PlayAnim(plr, self.AnimID)
+        print("a")
+        task.wait(self.PotionDisappearDelay)
 
         newPotion:Destroy()
         newWeld:Destroy()
@@ -85,6 +88,10 @@ function Potion.new(baseTbl)
     local self = setmetatable(TableUtil.Assign(baseTbl, {
         Instance = newInst,
         
+        AnimID = "rbxassetid://14862665190",
+        PotionDisappearDelay = 1, -- how many seconds after pickup until effect
+
+        BasicService = Knit.GetService("BasicService"),
         _trove = Trove.new()
     }), Potion)
 

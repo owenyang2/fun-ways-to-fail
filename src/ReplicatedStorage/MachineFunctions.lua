@@ -19,6 +19,14 @@ function MachineFunctions.GetHitboxParams()
     return params
 end
 
+function MachineFunctions.GetAnimLength(id)
+    local tempAnim = Instance.new("Animation")
+    tempAnim.AnimationId = id
+    
+    local tempTrack = Instance.new("Animator", Instance.new("Humanoid", game.Workspace)):LoadAnimation(tempAnim)
+    return tempTrack.Length
+end
+
 function MachineFunctions.GetAvailableInst(instTbl)
     local available = #instTbl
 

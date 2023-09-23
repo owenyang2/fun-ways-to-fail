@@ -4,10 +4,13 @@ local PhysicsService = game:GetService("PhysicsService")
 local Ragdoll = require(script.Parent.Parent.Classes.Ragdoll)
 
 local Knit = require(RepStorage.Packages.Knit)
+local Signal = require(RepStorage.Packages.Signal)
 
 local BasicService = Knit.CreateService {
     Name = "BasicService",
-    Client = {}
+    Client = {
+        PlayAnim = Knit.CreateSignal()
+    }
 }
 
 function BasicService.Client:SprintToggle(plr, toggle)
@@ -20,6 +23,34 @@ function BasicService.Client:SprintToggle(plr, toggle)
     end
 end
 
+function BasicService:DisableLayeredClothing()
+    local disabledLayeredClothing = {
+        Enum.AccessoryType.Jacket,
+        Enum.AccessoryType.Shorts,
+        Enum.AccessoryType.Eyebrow,
+        Enum.AccessoryType.Pants,
+        Enum.AccessoryType.Shirt,
+        Enum.AccessoryType.TShirt,
+        Enum.AccessoryType.Eyelash,
+        Enum.AccessoryType.Sweater,
+        Enum.AccessoryType.Unknown,
+        Enum.AccessoryType.LeftShoe,
+        Enum.AccessoryType.RightShoe,
+        Enum.AccessoryType.TeeShirt,
+        Enum.AccessoryType.DressSkirt        
+    }
+
+    game.Players.PlayerAdded:Connect(function(plr)
+        plr.CharacterAdded:Connect(function(chr)
+            for _, acc in ipairs(chr:GetChildren()) do
+                if acc:IsA("Accessory") and table.find(disabledLayeredClothing, acc.AccessoryType) then
+                    acc:Destroy()
+                end
+            end
+        end)
+    end)
+end
+
 function BasicService:SetupDeathCounter()
     game.Players.PlayerAdded:Connect(function(plr)
         plr.CharacterAdded:Connect(function(chr)
@@ -28,6 +59,10 @@ function BasicService:SetupDeathCounter()
             end)
         end)
     end)
+end
+
+function BasicService:PlayAnim(plr, id)
+    self.Client.PlayAnim:Fire(plr, id)
 end
 
 function BasicService.Client:GetLClothingSize(plr)
@@ -42,9 +77,12 @@ function BasicService.Client:GetLClothingSize(plr)
     return sizes
 end
 
+
 function BasicService:KnitStart()
     self.SprintWalkSpeed = 30
+
     self:SetupDeathCounter()
+    self:DisableLayeredClothing()
 end
 
 return BasicService
