@@ -25,7 +25,7 @@ function IceLake:CheckFall(dt)
         if info.Fallen then
             info.Time += dt
 
-            if info.Time < self.Presets.RespawnTime * 2 then continue end -- idk why but its not being exact, just add a bit more because idk
+            if info.Time < self.Presets.RespawnTime * 2 then continue end -- yeah idk the counter doesn't really work
             
             info.FakeIce:Destroy()
             info.FakeIce = nil
@@ -38,7 +38,17 @@ function IceLake:CheckFall(dt)
         else
             local parts = workspace:GetPartsInPart(info.Hitbox, self.MachineFuncs.GetHitboxParams())
             
-            if #parts > 0 then
+            local didChrs = {}
+
+            for _, part in ipairs(parts) do
+                local chr = part:FindFirstAncestorWhichIsA("Model")
+
+                if table.find(didChrs, chr) then
+                    continue
+                end
+
+                table.insert(didChrs, chr)
+
                 info.Time += dt
                 if info.Time >= self.Presets.FallDelay then
                     info.Time = 0
@@ -46,14 +56,25 @@ function IceLake:CheckFall(dt)
                     info.FakeIce = ice:Clone()
                     info.FakeIce.Anchored = false
                     info.FakeIce.Parent = self.Instance.FakeIce
-
                     PhysicsService:SetPartCollisionGroup(info.FakeIce, self.COLLISION_GROUP)
 
                     ice.Transparency = 1
                     ice.CanCollide = false
-                    info.Fallen = true    
+                    info.Fallen = true                    
+
+                    task.spawn(function()
+                        task.wait(0.5)
+                        info.FakeIce.Material = Enum.Material.Plastic
+                        local disappearTween = TweenService:Create(info.FakeIce, 
+                            TweenInfo.new(1.5, Enum.EasingStyle.Linear, Enum.EasingDirection.In), 
+                            {Transparency = 1}
+                        )
+                        disappearTween:Play()
+                    end)
                 end
-            else
+            end
+
+            if #didChrs == 0 then
                 info.Time = 0
             end
         end
