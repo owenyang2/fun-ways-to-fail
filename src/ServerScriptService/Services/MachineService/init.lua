@@ -60,7 +60,7 @@ function MachineService:KnitStart()
         script.IceLake,
         script.Rocket,
         script.Cannon,
-        --script.AppleTree,
+        script.AppleTree,
         script.Piranhas
     } -- modules that can be required
 

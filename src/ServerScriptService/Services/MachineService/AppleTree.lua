@@ -1,67 +1,68 @@
 local AppleTree = {}
 AppleTree.__index = AppleTree
 
+local HapticService = game:GetService("HapticService")
 local RepStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local ServerScriptService = game:GetService("ServerScriptService")
+local Debris = game:GetService("Debris")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
 
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
+local ServerComm = require(RepStorage.Packages.Comm).ServerComm
+local serverComm = ServerComm.new(RepStorage, "AppleTree")
+local appleSignal = serverComm:CreateSignal("DropApple")
+
 AppleTree.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("AppleTree")
 }
 
-local function getOverlapParams()
-    local op = OverlapParams.new()
-    op.FilterType = Enum.RaycastFilterType.Whitelist
+function AppleTree:SetupAppleSignal()
+    self._trove:Connect(appleSignal, function(plr, cf, cmd)
+        local apple = self.Apples[plr]
+        if not apple then return end
 
-    local t = {}
-
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        table.insert(t, plr.Character)
-    end
-
-    op.FilterDescendantsInstances = t
-    
-    return op
-end
-
-function AppleTree:KillChr(chr)
-    local newApple = RepStorage.Assets.Apple:Clone()
-    newApple.Parent = self.Instance
-
-    local newTrove = Trove.new()
-
-    newTrove:Connect(RunService.Heartbeat, function()
-        newApple.AlignPosition.Position = chr.HumanoidRootPart.Position
-        if not chr:FindFirstChild("HumanoidRootPart") then
-            newTrove:Destroy()
-        elseif (newApple.Position - chr.HumanoidRootPart.Position).Magnitude < 2 then
-            chr.Humanoid.Health = 0
-            newTrove:Destroy()
+        if cmd == "Move" then
+            apple.CFrame = cf
+        elseif cmd == "Destroy" then
+            apple:Destroy()
+            self.Apples[plr] = nil
         end
     end)
+end
+
+function AppleTree:KillPlr(plr)
+    local newSvApple = RepStorage.Assets.Apple:Clone()
+    newSvApple.CFrame = self.Instance.Apple.CFrame
+    newSvApple.Anchored = true
+    newSvApple.Parent = self.Instance
+    newSvApple.Name = plr.Name .. "AppleSv"
+
+    self.Apples[plr] = newSvApple
+    appleSignal:Fire(plr)
 end
 
 function AppleTree:Start()
     self._trove:Connect(RunService.Heartbeat, function()
-        local parts = workspace:GetPartBoundsInBox(self.Hitbox.CFrame, self.Hitbox.Size, getOverlapParams())
+        local parts = workspace:GetPartBoundsInBox(self.Hitbox.CFrame, self.Hitbox.Size, self.MachineFuncs.GetHitboxParams())
 
         for _, part in ipairs(parts) do
             local chr = part:FindFirstAncestorWhichIsA("Model")
+            local plr = game.Players:GetPlayerFromCharacter(chr)
 
-            if table.find(self.CurrentChrs, chr) or not game.Players:GetPlayerFromCharacter(chr) then continue end
-            table.insert(self.CurrentChrs, chr)
+            if not plr or self.Apples[plr] or chr.Humanoid.Health == 0 then continue end
 
             task.spawn(function()
-                self:KillChr(chr)
+                self:KillPlr(plr)
             end)
         end
     end)
+
+    self:SetupAppleSignal()
 end
 
 function AppleTree.new(baseTbl)
@@ -72,7 +73,9 @@ function AppleTree.new(baseTbl)
         Instance = newInst,
         Hitbox = newInst.Hitbox,
 
-        CurrentChrs = {},
+        Apples = {},
+        VeloDelay = 0.5,
+        FollowSpeed = 100,
 
         _trove = Trove.new()
     }), AppleTree)

@@ -12,21 +12,6 @@ local Piranha = Component.new {
     Tag = "Piranha"
 }
 
-local function getOverlapParams()
-    local op = OverlapParams.new()
-    op.FilterType = Enum.RaycastFilterType.Whitelist
-
-    local t = {}
-
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        table.insert(t, plr.Character)
-    end
-
-    op.FilterDescendantsInstances = t
-    
-    return op
-end
-
 function Piranha:TargetMovement()
     local targetPlr = self.FollowBehaviour.FollowingPlr
 
@@ -50,9 +35,9 @@ function Piranha:TargetMovement()
             self:DefaultMovement()
         end
 
-        self.Instance.LinearVelocity.VectorVelocity = (targetPlr.Character.HumanoidRootPart.Position - self.Instance.Position).Unit * 50
+        self.Instance.LinearVelocity.VectorVelocity = (targetPlr.Character.HumanoidRootPart.Position - self.Instance.Position).Unit * self.FollowBehaviour.Speed
         
-        local parts = game.Workspace:GetPartsInPart(self.Instance, getOverlapParams())
+        local parts = game.Workspace:GetPartsInPart(self.Instance, MachineFuncs.GetHitboxParams())
 
         for _, part in ipairs(parts) do
             local plr = game.Players:GetPlayerFromCharacter(part:FindFirstAncestorOfClass("Model"))
@@ -64,7 +49,7 @@ function Piranha:TargetMovement()
             self.Instance.LinearVelocity.VectorVelocity = Vector3.new(0, 0, 0)
             Debris:AddItem(self.Instance, game.Players.RespawnTime)
             self._trove:Clean()
-            break;
+            break
         end
     end)
 
@@ -91,7 +76,7 @@ function Piranha:DefaultMovement()
 
         -- check plr in radius
 
-        local parts = game.Workspace:GetPartBoundsInRadius(self.Instance.Position, self.FollowBehaviour.DetectionRad, getOverlapParams())
+        local parts = game.Workspace:GetPartBoundsInRadius(self.Instance.Position, self.FollowBehaviour.DetectionRad, MachineFuncs.GetHitboxParams())
 
         for _, part in ipairs(parts) do
             local chr = part:FindFirstAncestorOfClass("Model")
@@ -125,7 +110,8 @@ function Piranha:Start(part, parentInst)
         DetectionRad = 10,
         FollowingPlr = nil,
         TweenInfo = TweenInfo.new(3, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
-        VeloDelay = 0.5
+        VeloDelay = 0.5,
+        Speed = 50
     }
 
     self._trove = Trove.new()
