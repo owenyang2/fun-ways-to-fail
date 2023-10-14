@@ -13,16 +13,12 @@ local TableUtil = require(RepStorage.Packages.TableUtil)
 
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
-local ServerComm = require(RepStorage.Packages.Comm).ServerComm
-local serverComm = ServerComm.new(RepStorage, "AppleTree")
-local appleSignal = serverComm:CreateSignal("DropApple")
-
 AppleTree.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("AppleTree")
 }
 
 function AppleTree:SetupAppleSignal()
-    self._trove:Connect(appleSignal, function(plr, cf, cmd)
+    self._trove:Connect(self.DropSignal, function(plr, cf, cmd)
         local apple = self.Apples[plr]
         if not apple then return end
 
@@ -43,7 +39,7 @@ function AppleTree:KillPlr(plr)
     newSvApple.Name = plr.Name .. "AppleSv"
 
     self.Apples[plr] = newSvApple
-    appleSignal:Fire(plr)
+    self.DropSignal:Fire(plr)
 end
 
 function AppleTree:Start()
@@ -79,6 +75,8 @@ function AppleTree.new(baseTbl)
 
         _trove = Trove.new()
     }), AppleTree)
+
+    self.DropSignal = self.MachineFuncs.CreateGlobalSignal("MoveRepl", "DropApple")
 
     return self
 end

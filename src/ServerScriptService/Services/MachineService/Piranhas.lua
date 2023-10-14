@@ -2,20 +2,28 @@ local Piranhas = {}
 Piranhas.__index = Piranhas
 
 local RepStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
-local Knit = require(RepStorage.Packages.Knit)
 
+local PiranhaComponent = require(script.Parent.Parent.Parent.Components.PiranhaComponent)
 local Ragdoll = require(ServerScriptService.Server.Classes.Ragdoll)
 
 Piranhas.AvailableInstances = {
     game.Workspace.PlaceModels:FindFirstChild("Piranhas")
 }
+
+function Piranhas:SetupUpdateSignal()
+    self._trove:Connect(self.SendPSignal, function(plr, cf, cmd)
+        for _, pComponent in ipairs(self.Piranhas) do
+            if pComponent.FollowBehaviour.FollowingPlr == plr then
+                pComponent:UpdateSvInstance(cf, cmd)
+            end
+        end
+    end)
+end
 
 function Piranhas:SpawnPiranhas(amt)
     for i = 1, amt do
@@ -24,7 +32,10 @@ function Piranhas:SpawnPiranhas(amt)
     
         CollectionService:AddTag(inst, "Piranha")
     
-        table.insert(self.Piranhas, inst)    
+        PiranhaComponent:WaitForInstance(inst):await() -- wait for component to fully load
+
+        table.insert(self.Piranhas, PiranhaComponent:FromInstance(inst))
+        print(self.Piranhas)
 
         inst.Destroying:Connect(function()
             print("destorying, spawn new")
@@ -45,10 +56,14 @@ function Piranhas.new(baseTbl)
         Instance = newInst,
         
         Piranhas = {},
-        StartPAmount = 5,
-        
+        StartPAmount = 1,
+
         _trove = Trove.new()
     }), Piranhas)
+
+    self.SendPSignal = self.MachineFuncs.CreateGlobalSignal("MoveRepl", "SendPiranha")
+
+    self:SetupUpdateSignal()
 
     return self
 end

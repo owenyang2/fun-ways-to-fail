@@ -33,6 +33,9 @@ local MachineService = Knit.CreateService {
 }
 
 function MachineService:SetupMachines()
+    -- init global server comms
+    MachineFunctions.AddGlobalServerComm("MoveRepl")
+
     for _, module in ipairs(self.MachineModules) do
         if not module:IsA("ModuleScript") then
             warn("Machine " .. module.Name .. " could not be initialized as it is not a modulescript.")
@@ -40,7 +43,7 @@ function MachineService:SetupMachines()
         end
 
         local newMachine = require(module).new({
-            MachineFuncs = MachineFunctions
+            MachineFuncs = MachineFunctions,
         }) 
         print(module.Name)
         newMachine:Start()
