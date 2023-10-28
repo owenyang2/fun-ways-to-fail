@@ -11,8 +11,10 @@ local initList = {
 
 Knit.Start({ServicePromises = false}):andThen(function()
     for _, path in ipairs(initList) do
-        for _, s in ipairs(path:GetChildren()) do
-            require(s)
+        for _, s in ipairs(path:GetDescendants()) do
+            if s:IsA("ModuleScript") then
+                require(s)
+            end
         end
     end
 end):catch(warn)

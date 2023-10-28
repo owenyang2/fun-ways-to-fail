@@ -30,7 +30,7 @@ local function abbreviateNumber(number)
 end
 
 function UIController:SetupDeaths()
-    local deathsUI = self.Player.PlayerGui:WaitForChild("Main").HUD.Left.Folder.Deaths.Value
+    local deathsUI = self.Player.PlayerGui:WaitForChild("Main").HUD.Left.DeathCount.Deaths.Value
     local deathsServer = self.Player:WaitForChild("leaderstats").Deaths
 
     deathsUI.Text = abbreviateNumber(deathsServer.Value) -- init when first join
