@@ -54,7 +54,7 @@ function ToolService:PushPlayer(target: Player)
     ragdoll:Toggle(false)
 end
 
-function ToolService.Client:PushTarget(plr : Player, target : Player)
+function ToolService.Client:PushTargetClick(plr : Player, target : Player)
     print('yeah')
     local settings = self.Server.Settings
 

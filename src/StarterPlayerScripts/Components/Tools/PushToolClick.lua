@@ -22,7 +22,7 @@ function PushTool:SetupConnections()
 
         if targetPlr and targetPlr ~= self.Player then -- second part is redundant (since dont think plr is in mouse target collision group) but why not
             print("send")
-            self.ToolService:PushTarget(targetPlr)
+            self.ToolService:PushTargetClick(targetPlr)
         end
     end)
 end
