@@ -9,7 +9,7 @@ local MachineFuncs = require(RepStorage.Common.MachineFunctions)
 local Trove = require(RepStorage.Packages.Trove)
 
 local PushTool = Component.new {
-    Tag = "PushTool"
+    Tag = "PushToolClick"
 }
 
 function PushTool:SetupConnections()

@@ -61,8 +61,8 @@ function BasicService:SetupDeathCounter()
     end)
 end
 
-function BasicService:PlayAnim(plr, id)
-    self.Client.PlayAnim:Fire(plr, id)
+function BasicService:PlayAnim(plr, id, animProperties)
+    self.Client.PlayAnim:Fire(plr, id, animProperties)
 end
 
 function BasicService.Client:GetLClothingSize(plr)

@@ -26,11 +26,16 @@ function MachineFunctions.GetHitboxParams()
 end
 
 function MachineFunctions.GetAnimLength(id)
-    local tempAnim = Instance.new("Animation")
-    tempAnim.AnimationId = id
+    -- basic workaround to get anim length, maybe in the future make PlayAnim Signal return length instead
+    local hum = Instance.new("Humanoid", workspace)
     
-    local tempTrack = Instance.new("Animator", Instance.new("Humanoid", game.Workspace)):LoadAnimation(tempAnim)
-    return tempTrack.Length
+    local anim = Instance.new("Animation")
+    anim.AnimationId = id
+
+    local len = hum:LoadAnimation(anim).Length
+    hum:Destroy()
+
+    return len
 end
 
 function MachineFunctions.GetAvailableInst(instTbl)

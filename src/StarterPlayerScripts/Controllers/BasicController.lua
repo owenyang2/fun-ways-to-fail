@@ -56,16 +56,29 @@ function BasicController:SetupLClothing()
     end)
 end
 
+function BasicController:PlayAnim(id, animProperties) -- in the future, maybe preload animations
+    animProperties = animProperties or {}
+
+    local chr = self.Player.Character
+    local animator = chr.Humanoid:WaitForChild("Animator")
+
+    local anim = Instance.new("Animation")
+    anim.AnimationId = id
+
+    local animTrack = animator:LoadAnimation(anim)
+
+    for name, val in pairs(animProperties) do
+        animTrack[name] = val
+    end
+
+    animTrack:Play()
+
+    return animTrack
+end
+
 function BasicController:SetupAnimPlayer()
-    self.BasicService.PlayAnim:Connect(function(id)
-        local chr = self.Player.Character
-        local animator = chr.Humanoid:WaitForChild("Animator")
-    
-        local anim = Instance.new("Animation")
-        anim.AnimationId = id
-    
-        local animTrack = animator:LoadAnimation(anim)
-        animTrack:Play()
+    self.BasicService.PlayAnim:Connect(function(id, animProperties)
+        self:PlayAnim(id, animProperties)
     end)
 end
 
