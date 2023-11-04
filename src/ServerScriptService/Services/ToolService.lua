@@ -24,7 +24,7 @@ function ToolService:CheckHoldingTool(plr : Player, tag : string)
     return false
 end
 
-function ToolService:PushPlayer(target: Player)
+function ToolService:PushPlayer(target: Player, dir : Vector3)
     -- ragdoll target player
     local ragdoll = Ragdoll.GlobalRagdolls[target]
 
@@ -35,11 +35,13 @@ function ToolService:PushPlayer(target: Player)
     ragdoll:Toggle(true)
     ragdoll:EditCanRagdoll(false)
 
+    dir = dir or target.Character.HumanoidRootPart.CFrame.LookVector.Unit
+
     task.spawn(function()
         local tempVelo = Instance.new("LinearVelocity")
         tempVelo.MaxForce = math.huge
         tempVelo.Attachment0 = target.Character.Head.FaceCenterAttachment
-        tempVelo.VectorVelocity = target.Character.HumanoidRootPart.CFrame.LookVector.Unit * self.Settings.FallForce
+        tempVelo.VectorVelocity = dir * self.Settings.FallForce
         tempVelo.Name = "PushForce"
         tempVelo.Parent = target.Character.HumanoidRootPart
 
@@ -114,7 +116,7 @@ function ToolService.Client:PushTargetHitbox(plr : Player)
             if not targetPlr or targetPlr == plr then continue end
     
             table.insert(donePlrs, targetPlr)
-            self.Server:PushPlayer(targetPlr)
+            self.Server:PushPlayer(targetPlr, plr.Character.HumanoidRootPart.CFrame.LookVector.Unit)
         end
     end)
 
