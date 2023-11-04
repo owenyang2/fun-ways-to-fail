@@ -19,8 +19,19 @@ function HUD:SetupDeaths()
     end)
 end
 
+function HUD:SetupAnims()
+    for _, button in ipairs(self.hudUI:GetDescendants()) do
+        print(button)
+        if button:IsA("ImageButton") or button:IsA("TextButton") then
+            self.UIFuncs.ApplyButtonClickAnim(button)
+        end
+    end
+end
+
 function HUD:Start()
-    self:SetupDeaths()    
+    print("started hud")
+    self:SetupDeaths()
+    self:SetupAnims()
 end
 
 function HUD.new(baseTbl)

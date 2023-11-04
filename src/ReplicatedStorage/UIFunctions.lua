@@ -1,6 +1,9 @@
 -- ui functions that can be called for useful functions for all ui instances
 
 local RepStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+
+local Trove = require(RepStorage.Packages.Trove)
 
 local UIFunctions = {}
 
@@ -24,5 +27,29 @@ function UIFunctions.AbbreviateNumber(number)
 	end
 end
 
+function UIFunctions.ApplyButtonClickAnim(button, info, shrinkFactor)
+	info = info or TweenInfo.new(0.05, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
+	shrinkFactor = shrinkFactor or 1.25
+
+	local origButtonSize = button.Size
+	local buttonTrove = Trove.new()
+
+	local shrinkTween = TweenService:Create(button, info, {Size = UDim2.fromScale(origButtonSize.X.Scale / shrinkFactor, origButtonSize.Y.Scale / shrinkFactor)})
+	local revertTween = TweenService:Create(button, info, {Size = origButtonSize})
+
+	buttonTrove:Connect(button.MouseButton1Down, function()
+		shrinkTween:Play()
+	end)
+
+	buttonTrove:Connect(button.MouseButton1Up, function()
+		revertTween:Play()
+	end)
+
+	buttonTrove:Connect(button.MouseLeave, function()
+		revertTween:Play()
+	end)
+
+	return buttonTrove
+end
 
 return UIFunctions
