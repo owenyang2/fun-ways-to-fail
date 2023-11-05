@@ -27,26 +27,40 @@ function UIFunctions.AbbreviateNumber(number)
 	end
 end
 
-function UIFunctions.ApplyButtonClickAnim(button, info, shrinkFactor)
+function UIFunctions.ApplyButtonClickAnim(button, info, shrinkFactor, expandFactor)
 	info = info or TweenInfo.new(0.05, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
-	shrinkFactor = shrinkFactor or 1.25
+	shrinkFactor = shrinkFactor or 1.15
+	expandFactor = expandFactor or 1.15
 
 	local origButtonSize = button.Size
 	local buttonTrove = Trove.new()
 
 	local shrinkTween = TweenService:Create(button, info, {Size = UDim2.fromScale(origButtonSize.X.Scale / shrinkFactor, origButtonSize.Y.Scale / shrinkFactor)})
+	local expandTween = TweenService:Create(button, info, {Size = UDim2.fromScale(origButtonSize.X.Scale * expandFactor, origButtonSize.Y.Scale * expandFactor)})
 	local revertTween = TweenService:Create(button, info, {Size = origButtonSize})
+
+	local inArea = false
 
 	buttonTrove:Connect(button.MouseButton1Down, function()
 		shrinkTween:Play()
 	end)
 
 	buttonTrove:Connect(button.MouseButton1Up, function()
-		revertTween:Play()
+		if inArea then
+			expandTween:Play()
+		else
+			revertTween:Play()
+		end
 	end)
 
 	buttonTrove:Connect(button.MouseLeave, function()
+		inArea = false
 		revertTween:Play()
+	end)
+	
+	buttonTrove:Connect(button.MouseEnter, function()
+		inArea = true
+		expandTween:Play()
 	end)
 
 	return buttonTrove
