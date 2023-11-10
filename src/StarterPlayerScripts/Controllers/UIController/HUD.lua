@@ -19,9 +19,36 @@ function HUD:SetupDeaths()
     end)
 end
 
+function HUD:SetupMenus()
+    local menus = self.MainUI.Menus
+    local buttons = self.hudUI.Left.Button
+
+    local menuMappings = {
+        [buttons.Shop] = menus.ShopFrame,
+        [buttons.Spin] = menus.SpinFrame,
+        [buttons.UGC] = menus.UgcFrame
+    }
+
+    local openUI = nil
+
+    for button, frame in pairs(menuMappings) do
+        button.Activated:Connect(function()
+            if openUI then
+                openUI.Visible = false
+            end
+
+            if openUI ~= frame then
+                frame.Visible = true
+                openUI = frame
+            else
+                openUI = nil
+            end
+        end)
+    end
+end
+
 function HUD:SetupAnims()
     for _, button in ipairs(self.hudUI:GetDescendants()) do
-        print(button)
         if button:IsA("ImageButton") or button:IsA("TextButton") then
             self.UIFuncs.ApplyButtonClickAnim(button)
         end
@@ -32,6 +59,7 @@ function HUD:Start()
     print("started hud")
     self:SetupDeaths()
     self:SetupAnims()
+    self:SetupMenus()
 end
 
 function HUD.new(baseTbl)
