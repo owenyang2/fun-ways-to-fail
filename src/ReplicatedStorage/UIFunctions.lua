@@ -29,7 +29,7 @@ end
 
 function UIFunctions.ApplyButtonClickAnim(button, info, shrinkFactor, expandFactor)
 	info = info or TweenInfo.new(0.05, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
-	shrinkFactor = shrinkFactor or 1.15
+	shrinkFactor = shrinkFactor or 1.1
 	expandFactor = expandFactor or 1.15
 
 	local origButtonSize = button.Size

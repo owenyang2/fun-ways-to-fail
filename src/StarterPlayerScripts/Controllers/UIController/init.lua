@@ -35,7 +35,11 @@ function UIController:KnitStart()
     self._trove = Trove.new()
 
 	self.UIModules = {
-		script.HUD
+		script.HUD,
+        
+        script.Shop,
+        script.Spin,
+        script.UGC
 	}
 
     self:SetupUIs()

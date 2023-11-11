@@ -29,20 +29,20 @@ function HUD:SetupMenus()
         [buttons.UGC] = menus.UgcFrame
     }
 
-    local openUI = nil
-
     for button, frame in pairs(menuMappings) do
         button.Activated:Connect(function()
-            if openUI then
-                openUI.Visible = false
+            for _, checkFrame in pairs(menuMappings) do
+                if checkFrame == frame and checkFrame.Visible then -- clicked again to fully close
+                    checkFrame.Visible = false
+                    return
+                end
+
+                if checkFrame.Visible then
+                    checkFrame.Visible = false
+                end
             end
 
-            if openUI ~= frame then
-                frame.Visible = true
-                openUI = frame
-            else
-                openUI = nil
-            end
+            frame.Visible = true
         end)
     end
 end
