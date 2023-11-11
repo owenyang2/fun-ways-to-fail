@@ -14,12 +14,14 @@ local ProfileStore = ProfileService.GetProfileStore(
     "PlayerDataTest1",
     {
         -- Defaults
-        Deaths = 0
+        Deaths = 0,
+        Playtime = 0
     }
 )
 
 local createLeaderstats = { -- which keys to create leaderstats for
-    "Deaths"
+    "Deaths",
+    "Playtime"
 }
 
 local valueToInstVal = { -- value of data to value instance required to store
@@ -124,65 +126,32 @@ end
 
 function ProfileManager:WriteData(plr, key, val)
     local data = Profiles[plr].Data
-
-    local targetIndex = nil
-
-    if type(key) == "table" then
-        for _, subKey in ipairs(key) do
-            if not targetIndex then
-                targetIndex = data[subKey]
-            else
-                targetIndex = targetIndex[subKey]
-            end
-        end
-    else
-        targetIndex = data[key]
-    end
-
-    targetIndex = val
+    data[key] = val
 
     onDataUpdate(plr, key)
 end
 
 function ProfileManager:IncrementData(plr, key, increment)
     local data = Profiles[plr].Data
-    local targetIndex = nil
 
-    if type(key) == "table" then
-        for _, subKey in ipairs(key) do
-            if not targetIndex then
-                targetIndex = data[subKey]
-            else
-                targetIndex = targetIndex[subKey]
-            end
-        end
-    else
-        targetIndex = data[key]
-    end
-
-    self:WriteData(plr, key, targetIndex + increment)
+    self:WriteData(plr, key, data[key] + increment)
 end
 
 function ProfileManager:InsertData(plr, key, val)
     local data = Profiles[plr].Data
-    local targetIndex = nil
 
-    if type(key) == "table" then
-        for _, subKey in ipairs(key) do
-            if not targetIndex then
-                targetIndex = data[subKey]
-            else
-                targetIndex = targetIndex[subKey]
-            end
-        end
-    else
-        targetIndex = data[key]
-    end
-
-    local tCopy = DeepCopyTable(targetIndex)
+    local tCopy = DeepCopyTable(data[key])
     table.insert(tCopy, val)
 
     self:WriteData(plr, key, tCopy)
+end
+
+function ProfileManager:IsLoaded(plr)
+    if Profiles[plr] then
+        return true
+    else
+        return false
+    end
 end
 
 return ProfileManager

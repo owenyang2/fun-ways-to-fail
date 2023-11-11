@@ -55,10 +55,21 @@ function BasicService:SetupDeathCounter()
     game.Players.PlayerAdded:Connect(function(plr)
         plr.CharacterAdded:Connect(function(chr)
             chr.Humanoid.Died:Connect(function()
-                plr:WaitForChild("leaderstats").Deaths.Value += 1
+                self.ProfileManager:IncrementData(plr, "Deaths", 1)
             end)
         end)
     end)
+end
+
+function BasicService:SetupPlaytimeIncrease()
+    while true do
+        for _, plr in ipairs(game.Players:GetPlayers()) do
+            if self.ProfileManager:IsLoaded(plr) then
+                self.ProfileManager:IncrementData(plr, "Playtime", 1)
+            end
+        end
+        task.wait(1)
+    end
 end
 
 function BasicService:PlayAnim(plr, id, animProperties)
@@ -77,12 +88,14 @@ function BasicService.Client:GetLClothingSize(plr)
     return sizes
 end
 
-
 function BasicService:KnitStart()
     self.SprintWalkSpeed = 30
 
+    self.ProfileManager = Knit.GetService("ProfileManager")
+
     self:SetupDeathCounter()
     self:DisableLayeredClothing()
+    self:SetupPlaytimeIncrease()
 end
 
 return BasicService
