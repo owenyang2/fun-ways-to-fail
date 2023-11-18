@@ -15,6 +15,7 @@ local FoodController = Knit.CreateController {
 local FoodModel = game.Workspace.PlaceModels.Food
 
 function FoodController:Grab()
+    self._trove:Clean()
     self.CurrentBurgerInst:Destroy()
     self.CurrentBurgerInst = nil
 
@@ -31,23 +32,21 @@ function FoodController:Dispense()
     self.CurrentBurgerInst.Position = FoodModel.StartPos.Position
 
     local posInfo = TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.In)
-    local rotInfo =  TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
-
     local posTween = TweenService:Create(self.CurrentBurgerInst, posInfo, {Position = FoodModel.EndPos.Position})
-    local rotTween = TweenService:Create(self.CurrentBurgerInst, rotInfo, {Orientation = self.CurrentBurgerInst.Orientation + Vector3.new(0, 180, 0)})
-
-    rotTween.Completed:Connect(function(playbackState)
-        if playbackState == Enum.PlaybackState.Completed then
-            rotTween:Play()
-        end
-    end)
-
     posTween:Play()
-    rotTween:Play()
+
+    self._trove:Add(task.spawn(function()
+        while true do
+            local rotInfo =  TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.In)
+            local rotTween = TweenService:Create(self.CurrentBurgerInst, rotInfo, {Orientation = self.CurrentBurgerInst.Orientation + Vector3.new(0, 180, 0)})
+            rotTween:Play()
+            rotTween.Completed:Wait()        
+        end
+    end))
 
     self.CurrentBurgerInst.ClickDetector.MouseClick:Connect(function()
         self:Grab()
-    end)
+    end)    
 end
 
 function FoodController:KnitStart()
