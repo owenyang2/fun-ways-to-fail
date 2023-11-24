@@ -53,7 +53,7 @@ function SpinService:KnitStart()
         -- Types: Normal (edits datastore), Custom (make custom function to reward)
         -- must add up to 100%
         {Reward = "UGC Item", Percent = 0.01, Type = "Custom"},
-        {Reward = "Boink Hammer", Percent = 0.05, Type = "Custom"},
+        {Reward = "Cartoony Boink Hammer", Percent = 0.05, Type = "Custom"},
         {Reward = "100 Deaths", Percent = 0.1, Type = "Normal", StatIncrease = {"Deaths", 100}},
         {Reward = "50 Deaths", Percent = 0.15, Type = "Normal", StatIncrease = {"Deaths", 50}},
         {Reward = "30 Deaths", Percent = 0.19, Type = "Normal", StatIncrease = {"Deaths", 30}},
