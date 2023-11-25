@@ -17,20 +17,20 @@ function SpinService.Client:GenReward(plr)
 
     local currBounds = 0
 
-    for rewardNum, data in ipairs(self.Sections) do
+    for rewardNum, data in pairs(self.Server.Sections) do
         currBounds += data.Percent * 100
         if sectionNum <= currBounds then -- in the correct section, since within the bounds
             self.Server.UnclaimedRewards[plr] = rewardNum
-            return data.Reward
+            return rewardNum
         end
     end
 end
 
-function SpinService.Client:GetReward(plr)
+function SpinService.Client:ClaimReward(plr)
     local rewardNum = self.Server.UnclaimedRewards[plr]
     self.Server.UnclaimedRewards[plr] = nil
 
-    local reward = self.Sections[rewardNum]
+    local reward = self.Server.Sections[rewardNum]
     if reward.Type == "Normal" then
         self.Server.ProfileManager:IncrementData(plr, reward.StatIncrease[1], reward.StatIncrease[2])
     elseif reward.Type == "Custom" then
