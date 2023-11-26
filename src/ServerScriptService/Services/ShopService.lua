@@ -11,7 +11,9 @@ local ShopService = Knit.CreateService {
 function ShopService:GamepassPurchased(plr, passID, success)
     for _, gp in ipairs(self.Gamepasses) do
         if gp.ID == passID and success then
-            -- bought
+            -- successfully bought
+            self.BasicService:ConfirmGamepass(plr)
+            self.BasicService:GiveGamepassPerks()
         end
     end
 end
@@ -22,9 +24,12 @@ function ShopService:Setup()
     end)
 end
 
-function ShopService.Client:GetGamepasses(plr)
-    print(self.Server.Gamepasses)
+function ShopService:GetGamepasses()
     return self.Server.Gamepasses
+end
+
+function ShopService.Client:GetGamepasses()
+    return self.Server:GetGamepasses()
 end
 
 function ShopService:SetupGamepassList(ids)
@@ -35,11 +40,12 @@ end
 
 function ShopService:KnitStart()
     self.ProfileManager = Knit.GetService("ProfileManager")
-
+    self.BasicService = Knit.GetService("BasicService")
+    
     self.Gamepasses = {}
     self:SetupGamepassList({
-        663003959,
-        663875014
+        663003959, -- sprint
+        663875014 -- op hammer
     })
 
     self.UnclaimedRewards = {}

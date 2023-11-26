@@ -1,5 +1,6 @@
 local RepStorage = game:GetService("ReplicatedStorage")
 local PhysicsService = game:GetService("PhysicsService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local Ragdoll = require(script.Parent.Parent.Classes.Ragdoll)
 
@@ -23,7 +24,39 @@ function BasicService.Client:SprintToggle(plr, toggle)
     end
 end
 
-function BasicService:DisableLayeredClothing()
+function BasicService:GiveGamepassPerks(plr)
+    local updatedData = self.ProfileManager:GetData(plr)
+    if table.find(updatedData.Gamepasses, 663875014) then -- op hammer gamepass
+        -- give op hammer
+    end
+end
+
+function BasicService:ConfirmGamepasses(plr)
+    local gamepasses = self.ShopService:GetGamepasses()
+    local data = self.ProfileManager:GetData(plr)
+    for _, gp in ipairs(gamepasses) do
+        local hasPass = false
+
+        local succ, msg = pcall(function() -- maybe check datastore instead of api call
+            hasPass = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, gp.ProductId)
+        end)
+    
+        if not succ then
+            warn("Error while checking if player has pass: " .. tostring(msg))
+            return
+        end
+
+        local inDS = table.find(data.Gamepasses, gp.ProductId)
+
+        if hasPass and not inDS then
+            self.ProfileManager:InsertData(data.Gamepasses, gp.ProductId)
+        elseif not hasPass and inDS then
+            self.ProfileManager:RemoveData(data.Gamepasses, gp.ProductId)
+        end
+    end
+end
+
+function BasicService:SetupPlayerJoin()
     local disabledLayeredClothing = {
         Enum.AccessoryType.Jacket,
         Enum.AccessoryType.Shorts,
@@ -41,35 +74,35 @@ function BasicService:DisableLayeredClothing()
     }
 
     game.Players.PlayerAdded:Connect(function(plr)
+        repeat task.wait(0.1) until self.ProfileManager:IsLoaded(plr)
+
+        -- setup player increase
+        task.spawn(function()
+            while true do
+                self.ProfileManager:IncrementData(plr, "Playtime", 1)
+                task.wait(1)
+            end
+        end)
+
+        -- confirm gamepasses
+        self:ConfirmGamepasses(plr)
+
         plr.CharacterAdded:Connect(function(chr)
+            -- setup death counter
+            chr.Humanoid.Died:Connect(function()
+                self.ProfileManager:IncrementData(plr, "Deaths", 1)
+            end)
+
+            -- disable layered clothing
             for _, acc in ipairs(chr:GetChildren()) do
                 if acc:IsA("Accessory") and table.find(disabledLayeredClothing, acc.AccessoryType) then
                     acc:Destroy()
                 end
             end
+
+            self:GiveGamepassPerks(plr)
         end)
     end)
-end
-
-function BasicService:SetupDeathCounter()
-    game.Players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(function(chr)
-            chr.Humanoid.Died:Connect(function()
-                self.ProfileManager:IncrementData(plr, "Deaths", 1)
-            end)
-        end)
-    end)
-end
-
-function BasicService:SetupPlaytimeIncrease()
-    while true do
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            if self.ProfileManager:IsLoaded(plr) then
-                self.ProfileManager:IncrementData(plr, "Playtime", 1)
-            end
-        end
-        task.wait(1)
-    end
 end
 
 function BasicService:PlayAnim(plr, id, animProperties)
@@ -92,10 +125,9 @@ function BasicService:KnitStart()
     self.SprintWalkSpeed = 30
 
     self.ProfileManager = Knit.GetService("ProfileManager")
+    self.ShopService = Knit.GetService("ShopService")
 
-    self:SetupDeathCounter()
-    self:DisableLayeredClothing()
-    self:SetupPlaytimeIncrease()
+    self:SetupPlayerJoin()
 end
 
 return BasicService

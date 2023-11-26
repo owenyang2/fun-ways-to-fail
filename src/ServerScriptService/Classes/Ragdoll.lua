@@ -126,7 +126,7 @@ function Ragdoll:Toggle(enable)
 		-- legs tended to remain stuck together, so seperate them using force for better vfx (or maybe try using the motor6ds in the future)
 		self._vfTrove:Clean()
 
-		if chr.LeftUpperLeg then
+		if chr:FindFirstChild("LeftUpperLeg") then
 			local vfLeft = Instance.new("VectorForce")
 			vfLeft.Attachment0 = chr.LeftUpperLeg.RagdollAtt0
 			vfLeft.Force = Vector3.new(-500, 0, 0)
@@ -138,7 +138,7 @@ function Ragdoll:Toggle(enable)
 			end)	
 		end
 	
-		if chr.RightUpperLeg then
+		if chr:FindFirstChild("RightUpperLeg") then
 			local vfRight = Instance.new("VectorForce")
 			vfRight.Attachment0 = chr.RightUpperLeg.RagdollAtt0
 			vfRight.Force = Vector3.new(500, 0, 0)

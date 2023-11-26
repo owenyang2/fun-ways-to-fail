@@ -11,10 +11,10 @@ local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
 
 function UGC:AddUGCGoal(settings)
-    local ugcFrame = RepStorage.Assets.uiUGC.UgcFrame:Clone()
+    local ugcFrame = RepStorage.Assets.UGCUI.UgcFrame:Clone()
     ugcFrame.Number.Text = settings.Text
 
-    local grad = RepStorage.Assets.uiUGC.Gradients[settings.Rarity]:Clone()
+    local grad = RepStorage.Assets.UGCUI.Gradients[settings.Rarity]:Clone()
     grad.Parent = ugcFrame
 
     ugcFrame.Parent = self.ugcUI.Frame.FrameHolder

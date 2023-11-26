@@ -17,18 +17,18 @@ function Shop:SetupShopUI()
     -- TODO: show bought on ui after bought as well as if bought before (check if bought before)
 
     for _, gamepass in ipairs(self.ShopService:GetGamepasses()) do
-        local newGpFrame = RepStorage.Assets.uiShop.GamepassFrame:Clone()
+        local newGpFrame = RepStorage.Assets.ShopUI.GamepassFrame:Clone()
         newGpFrame.Icon.Image = "rbxassetid://" .. tostring(gamepass.IconImageAssetId)
         
         newGpFrame.Purchase.Activated:Connect(function()
             local hasPass = false
 
-            local success, message = pcall(function()
+            local succ, msg = pcall(function() -- maybe check datastore instead of api call
                 hasPass = MarketplaceService:UserOwnsGamePassAsync(self.Player.UserId, gamepass.ProductId)
             end)
         
-            if not success then
-                warn("Error while checking if player has pass: " .. tostring(message))
+            if not succ then
+                warn("Error while checking if player has pass: " .. tostring(msg))
                 return
             end
         
