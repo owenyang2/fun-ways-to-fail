@@ -58,6 +58,12 @@ end
 
 function Spin:SpinWheel()
     local rewardNum = self.SpinService:GenReward()
+
+    if not rewardNum then -- spin in progress
+        print("Current spin not finished!")
+        return
+    end
+
     self:PlaySpinAnim(rewardNum)
     self.SpinService:ClaimReward()
     print("Won " .. self.SpinService:GetSections()[rewardNum].Reward)

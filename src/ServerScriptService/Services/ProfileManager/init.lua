@@ -127,6 +127,10 @@ function ProfileManager.Client:GetData(plr)
 end
 
 function ProfileManager:WriteData(plr, key, val)
+    if not Profiles[plr] then
+        warn("Player " .. plr.Name .. "'s data wasn't written correctly!")
+        return
+    end
     local data = Profiles[plr].Data
     data[key] = val
 
@@ -134,12 +138,20 @@ function ProfileManager:WriteData(plr, key, val)
 end
 
 function ProfileManager:IncrementData(plr, key, increment)
+    if not Profiles[plr] then
+        warn("Player " .. plr.Name .. "'s data wasn't incremented correctly!")
+        return
+    end
     local data = Profiles[plr].Data
 
     self:WriteData(plr, key, data[key] + increment)
 end
 
 function ProfileManager:InsertData(plr, key, val)
+    if not Profiles[plr] then
+        warn("Player " .. plr.Name .. "'s data wasn't inserted correctly!")
+        return
+    end
     local data = Profiles[plr].Data
 
     local tCopy = DeepCopyTable(data[key])
@@ -149,6 +161,10 @@ function ProfileManager:InsertData(plr, key, val)
 end
 
 function ProfileManager:RemoveData(plr, key, val)
+    if not Profiles[plr] then
+        warn("Player " .. plr.Name .. "'s data wasn't removed correctly!")
+        return
+    end
     local data = Profiles[plr].Data
 
     local tCopy = DeepCopyTable(data[key])

@@ -26,7 +26,7 @@ end
 
 function BasicService:GiveGamepassPerks(plr)
     local updatedData = self.ProfileManager:GetData(plr)
-    if table.find(updatedData.Gamepasses, 663875014) then -- op hammer gamepass
+    if table.find(updatedData.GamepassesOwned, 663875014) then -- op hammer gamepass
         -- give op hammer
     end
 end
