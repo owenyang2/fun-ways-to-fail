@@ -15,13 +15,13 @@ function BasicController:SetupInput()
     UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
         if gameProcessedEvent then return end
         
-        if input.KeyCode == Enum.KeyCode.LeftShift then
+        if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.LeftControl then
             self.BasicService:SprintToggle(true)
         end
     end)
 
     UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
-        if input.KeyCode == Enum.KeyCode.LeftShift then
+        if input.KeyCode == Enum.KeyCode.LeftShift or input.KeyCode == Enum.KeyCode.LeftControl then
             self.BasicService:SprintToggle(false)
         end
     end)

@@ -46,12 +46,13 @@ function BasicService:ConfirmGamepasses(plr)
             return
         end
 
-        local inDS = table.find(data.Gamepasses, gp.ProductId)
+        print(data)
+        local inDS = table.find(data.GamepassesOwned, gp.ProductId)
 
         if hasPass and not inDS then
-            self.ProfileManager:InsertData(data.Gamepasses, gp.ProductId)
+            self.ProfileManager:InsertData(data.GamepassesOwned, gp.ProductId)
         elseif not hasPass and inDS then
-            self.ProfileManager:RemoveData(data.Gamepasses, gp.ProductId)
+            self.ProfileManager:RemoveData(data.GamepassesOwned, gp.ProductId)
         end
     end
 end

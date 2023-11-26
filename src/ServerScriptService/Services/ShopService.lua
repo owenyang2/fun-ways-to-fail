@@ -25,7 +25,7 @@ function ShopService:Setup()
 end
 
 function ShopService:GetGamepasses()
-    return self.Server.Gamepasses
+    return self.Gamepasses
 end
 
 function ShopService.Client:GetGamepasses()
