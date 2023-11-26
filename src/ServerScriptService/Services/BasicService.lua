@@ -1,11 +1,8 @@
 local RepStorage = game:GetService("ReplicatedStorage")
-local PhysicsService = game:GetService("PhysicsService")
 local MarketplaceService = game:GetService("MarketplaceService")
 
-local Ragdoll = require(script.Parent.Parent.Classes.Ragdoll)
-
 local Knit = require(RepStorage.Packages.Knit)
-local Signal = require(RepStorage.Packages.Signal)
+local Trove = require(RepStorage.Packages.Trove)
 
 local BasicService = Knit.CreateService {
     Name = "BasicService",
@@ -77,13 +74,15 @@ function BasicService:SetupPlayerJoin()
     game.Players.PlayerAdded:Connect(function(plr)
         repeat task.wait(0.1) until self.ProfileManager:IsLoaded(plr)
 
+        self.PlayerTroves[plr].PlaytimeTrove = Trove.new()
+
         -- setup player increase
-        task.spawn(function()
+        self.PlayerTroves[plr].PlaytimeTrove:Add(task.spawn(function()
             while true do
                 self.ProfileManager:IncrementData(plr, "Playtime", 1)
                 task.wait(1)
             end
-        end)
+        end))
 
         -- confirm gamepasses
         self:ConfirmGamepasses(plr)
@@ -103,6 +102,10 @@ function BasicService:SetupPlayerJoin()
 
             self:GiveGamepassPerks(plr)
         end)
+    end)
+
+    game.Players.PlayerRemoving:Connect(function(plr)
+        self.PlayerTroves[plr].PlaytimeTrove:Destroy()
     end)
 end
 
@@ -127,6 +130,8 @@ function BasicService:KnitStart()
 
     self.ProfileManager = Knit.GetService("ProfileManager")
     self.ShopService = Knit.GetService("ShopService")
+
+    self.PlayerTroves = {}
 
     self:SetupPlayerJoin()
 end
