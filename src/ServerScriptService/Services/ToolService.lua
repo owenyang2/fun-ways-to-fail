@@ -58,18 +58,20 @@ end
 
 function ToolService.Client:PushTargetHitbox(plr : Player)
     local toolSettings = self.Server.Settings.Push
+    local tool = self.Server:CheckHoldingTool(plr, "PushToolHitbox")
 
     -- check if can push
-    if not plr.Character or not self.Server:CheckHoldingTool(plr, "PushToolHitbox") then return end
+    if not plr.Character or not tool then return end
 
     -- check cooldown
     if self.Server.LastPush[plr] ~= nil and os.time() - self.Server.LastPush[plr] < toolSettings.Cooldown then return end
+    
     self.Server.LastPush[plr] = os.time()
-
     --self.Server.BasicService:PlayAnim(plr, self.Server.Anims.PushAnimID, {Looped = false})
     self.Server.BasicService:PlayAnim(plr, self.Server.Anims.PushAnimID)
 
     local tempTrove = Trove.new()
+    tempTrove:AttachToInstance(tool)
     tempTrove:Connect(RunService.Heartbeat, function(dt)
         if not plr.Character then return end
     
@@ -101,13 +103,14 @@ function ToolService.Client:SwingBoinkHammer(plr : Player)
 
     if not plr.Character or not tool then return end
     if self.Server.LastSwingBoink[plr] ~= nil and os.time() - self.Server.LastSwingBoink[plr] < toolSettings.Cooldown then return end
-    
+
     self.Server.LastSwingBoink[plr] = os.time()
     self.Server.BasicService:PlayAnim(plr, self.Server.Anims.SwingAnimID)
 
     local tempTrove = Trove.new()
+    tempTrove:AttachToInstance(tool)
     tempTrove:Connect(RunService.Heartbeat, function(dt)
-        if not plr.Character then return end
+        if not plr.Character or not tool:FindFirstChild("Handle") then return end
     
         local parts = game.Workspace:GetPartsInPart(tool.Handle, MachineFuncs.GetHitboxParams())
     

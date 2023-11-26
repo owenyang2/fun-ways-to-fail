@@ -2,8 +2,9 @@ local Shop = {}
 Shop.__index = Shop
 
 local RepStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local Knit = require(RepStorage.Packages.Knit)
 
 local Trove = require(RepStorage.Packages.Trove)
 local TableUtil = require(RepStorage.Packages.TableUtil)
@@ -12,6 +13,32 @@ function Shop:SetupShopUI()
     self.shopUI.Close.Activated:Connect(function()
         self.shopUI.Visible = false
     end)
+    
+    -- TODO: show bought on ui after bought as well as if bought before (check if bought before)
+
+    for _, gamepass in ipairs(self.ShopService:GetGamepasses()) do
+        local newGpFrame = RepStorage.Assets.uiShop.GamepassFrame:Clone()
+        newGpFrame.Icon.Image = "rbxassetid://" .. tostring(gamepass.IconImageAssetId)
+        
+        newGpFrame.Purchase.Activated:Connect(function()
+            local hasPass = false
+
+            local success, message = pcall(function()
+                hasPass = MarketplaceService:UserOwnsGamePassAsync(self.Player.UserId, gamepass.ProductId)
+            end)
+        
+            if not success then
+                warn("Error while checking if player has pass: " .. tostring(message))
+                return
+            end
+        
+            if not hasPass then
+                MarketplaceService:PromptGamePassPurchase(self.Player, gamepass.ProductId)
+            end        
+        end)
+
+        newGpFrame.Parent = self.shopUI.ScrollingFrame
+    end
 end
 
 function Shop:SetupAnims()
@@ -39,7 +66,8 @@ function Shop.new(baseTbl)
 
     local self = setmetatable(TableUtil.Assign(baseTbl, {
         shopUI = baseTbl.MainUI.Menus.ShopFrame,
-
+        
+        ShopService = Knit.GetService("ShopService"),
         _trove = Trove.new()
     }), Shop)
 
