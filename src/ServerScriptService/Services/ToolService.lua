@@ -15,7 +15,7 @@ local ToolService = Knit.CreateService {
     Client = {}
 }
 
-function ToolService:CheckHoldingTool(plr : Player, tag : string)
+function ToolService:CheckHoldingToolWithTag(plr : Player, tag : string)
     local holdingTool = plr.Character:FindFirstChildOfClass("Tool") -- pretty sure can only have at most 1 tool in chr, the one holding
     if not holdingTool then return end
 
@@ -58,7 +58,7 @@ end
 
 function ToolService.Client:PushTargetHitbox(plr : Player)
     local toolSettings = self.Server.Settings.Push
-    local tool = self.Server:CheckHoldingTool(plr, "PushToolHitbox")
+    local tool = self.Server:CheckHoldingToolWithTag(plr, self:ToolToTag("Push"))
 
     -- check if can push
     if not plr.Character or not tool then return end
@@ -99,7 +99,7 @@ end
 
 function ToolService.Client:SwingBoinkHammer(plr : Player)
     local toolSettings = self.Server.Settings.BoinkHammer
-    local tool = self.Server:CheckHoldingTool(plr, "BoinkHammer")
+    local tool = self.Server:CheckHoldingToolWithTag(plr, self:ToolToTag("BoinkHammer"))
 
     if not plr.Character or not tool then return end
     if self.Server.LastSwingBoink[plr] ~= nil and os.time() - self.Server.LastSwingBoink[plr] < toolSettings.Cooldown then return end
@@ -130,6 +130,15 @@ function ToolService.Client:SwingBoinkHammer(plr : Player)
 
     task.wait(toolSettings.Length)
     tempTrove:Destroy()
+end
+
+function ToolService:ToolToTag(tool)
+    local toolToTag = {
+        Push = "PushToolHitbox",
+        BoinkHammer = "BoinkHammer"
+    }
+
+    return toolToTag[tool]
 end
 
 function ToolService:KnitStart()

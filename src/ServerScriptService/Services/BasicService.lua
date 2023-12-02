@@ -14,17 +14,43 @@ local BasicService = Knit.CreateService {
 function BasicService.Client:SprintToggle(plr, toggle)
     if not plr.Character then return end
     
+    local origWalkSpeed = game.StarterPlayer.CharacterWalkSpeed
+    local sprintWalkSpeed = self.Server.SprintWalkSpeed
+
+    if self.Server.DoubleSprint[plr] then
+        sprintWalkSpeed = self.Server.SprintWalkSpeed * 2
+    end
+
     if toggle then
-        plr.Character.Humanoid.WalkSpeed = self.Server.SprintWalkSpeed
+        plr.Character.Humanoid.WalkSpeed = sprintWalkSpeed
     else
-        plr.Character.Humanoid.WalkSpeed = game.StarterPlayer.CharacterWalkSpeed
+        plr.Character.Humanoid.WalkSpeed = origWalkSpeed
     end
 end
 
-function BasicService:GiveGamepassPerks(plr)
+function BasicService:GiveSpawnPerks(plr)
+    print("update!")
     local updatedData = self.ProfileManager:GetData(plr)
-    if table.find(updatedData.GamepassesOwned, 663875014) then -- op hammer gamepass
+    if table.find(updatedData.GamepassesOwned, self.ShopService:GetGamepassNameToID("OPHammer")) then -- op hammer gamepass
         -- give op hammer
+    end
+
+    print(self.DoubleSprint, updatedData.GamepassesOwned)
+
+    if not self.DoubleSprint[plr] and table.find(updatedData.GamepassesOwned, self.ShopService:GetGamepassNameToID("Sprint")) then -- sprint gamepass
+        print("a")
+        self.DoubleSprint[plr] = true
+    end
+
+    for name, owned in pairs(updatedData.PermanentItems) do
+        if not owned then continue end
+
+        if name == "BoinkHammer" then
+            if not self.ToolService:CheckHoldingToolWithTag(plr, self.ToolService:ToolToTag("BoinkHammer")) then
+                local newTool = RepStorage.Assets.Tools:FindFirstChild("Cartoony Boink Hammer"):Clone()
+                newTool.Parent = plr.Backpack
+            end
+        end
     end
 end
 
@@ -35,7 +61,7 @@ function BasicService:ConfirmGamepasses(plr)
         local hasPass = false
 
         local succ, msg = pcall(function() -- maybe check datastore instead of api call
-            hasPass = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, gp.ProductId)
+            hasPass = MarketplaceService:UserOwnsGamePassAsync(plr.UserId, gp.TargetId)
         end)
     
         if not succ then
@@ -43,13 +69,14 @@ function BasicService:ConfirmGamepasses(plr)
             return
         end
 
-        print(data)
-        local inDS = table.find(data.GamepassesOwned, gp.ProductId)
+        local inDS = table.find(data.GamepassesOwned, gp.TargetId)
+
+        print("DEBUG: ", hasPass, inDS)
 
         if hasPass and not inDS then
-            self.ProfileManager:InsertData(data.GamepassesOwned, gp.ProductId)
+            self.ProfileManager:InsertData(plr, "GamepassesOwned", gp.TargetId)
         elseif not hasPass and inDS then
-            self.ProfileManager:RemoveData(data.GamepassesOwned, gp.ProductId)
+            self.ProfileManager:RemoveData(plr, "GamepassesOwned", gp.TargetId)
         end
     end
 end
@@ -72,6 +99,9 @@ function BasicService:SetupPlayerJoin()
     }
 
     game.Players.PlayerAdded:Connect(function(plr)
+        -- setup tables
+        self.PlayerTroves[plr] = {}
+
         repeat task.wait(0.1) until self.ProfileManager:IsLoaded(plr)
 
         self.PlayerTroves[plr].PlaytimeTrove = Trove.new()
@@ -100,7 +130,7 @@ function BasicService:SetupPlayerJoin()
                 end
             end
 
-            self:GiveGamepassPerks(plr)
+            self:GiveSpawnPerks(plr)
         end)
     end)
 
@@ -130,8 +160,11 @@ function BasicService:KnitStart()
 
     self.ProfileManager = Knit.GetService("ProfileManager")
     self.ShopService = Knit.GetService("ShopService")
+    self.ToolService = Knit.GetService("ToolService")
 
     self.PlayerTroves = {}
+
+    self.DoubleSprint = {}
 
     self:SetupPlayerJoin()
 end

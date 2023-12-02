@@ -34,6 +34,12 @@ function SpinService.Client:ClaimReward(plr)
             -- give ugc
         elseif reward.Reward == "Boink Hammer" then
             -- give hammer
+            local updatedPermItems = self.Server.ProfileManager:GetData(plr).PermanentItems
+            updatedPermItems.BoinkHammer = true
+
+            self.Server.ProfileManager:WriteData(plr, "PermanentItems", updatedPermItems)
+            
+            self.Server.BasicService:GiveSpawnPerks(plr)
         end
     end
 end
@@ -44,6 +50,7 @@ end
 
 function SpinService:KnitStart()
     self.ProfileManager = Knit.GetService("ProfileManager")
+    self.BasicService = Knit.GetService("BasicService")
 
     self.Sections = {
         -- Types: Normal (edits datastore), Custom (make custom function to reward)
@@ -52,8 +59,8 @@ function SpinService:KnitStart()
         {Reward = "Cartoony Boink Hammer", Percent = 0.05, Type = "Custom"},
         {Reward = "100 Deaths", Percent = 0.1, Type = "Normal", StatIncrease = {"Deaths", 100}},
         {Reward = "50 Deaths", Percent = 0.15, Type = "Normal", StatIncrease = {"Deaths", 50}},
-        {Reward = "30 Deaths", Percent = 0.19, Type = "Normal", StatIncrease = {"Deaths", 30}},
-        {Reward = "10 Deaths", Percent = 0.5, Type = "Normal", StatIncrease = {"Deaths", 10}}
+        {Reward = "30 Deaths", Percent = 0.29, Type = "Normal", StatIncrease = {"Deaths", 30}},
+        {Reward = "10 Deaths", Percent = 0.40, Type = "Normal", StatIncrease = {"Deaths", 10}}
     }
 
     self.UnclaimedRewards = {}

@@ -24,7 +24,7 @@ function Shop:SetupShopUI()
             local hasPass = false
 
             local succ, msg = pcall(function() -- maybe check datastore instead of api call
-                hasPass = MarketplaceService:UserOwnsGamePassAsync(self.Player.UserId, gamepass.ProductId)
+                hasPass = MarketplaceService:UserOwnsGamePassAsync(self.Player.UserId, gamepass.TargetId)
             end)
         
             if not succ then
@@ -33,7 +33,8 @@ function Shop:SetupShopUI()
             end
         
             if not hasPass then
-                MarketplaceService:PromptGamePassPurchase(self.Player, gamepass.ProductId)
+                print(gamepass)
+                MarketplaceService:PromptGamePassPurchase(self.Player, gamepass.TargetId)
             end        
         end)
 

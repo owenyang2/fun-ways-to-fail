@@ -17,7 +17,10 @@ local ProfileStore = ProfileService.GetProfileStore(
         Deaths = 0,
         Playtime = 0,
 
-        GamepassesOwned = {}
+        GamepassesOwned = {},
+        PermanentItems = {
+            BoinkHammer = false
+        }
     }
 )
 
