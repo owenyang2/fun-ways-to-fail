@@ -171,7 +171,7 @@ function ProfileManager:RemoveData(plr, key, val)
     local data = Profiles[plr].Data
 
     local tCopy = DeepCopyTable(data[key])
-    table.remove(table.find(tCopy, val))
+    table.remove(tCopy, table.find(tCopy, val))
 
     self:WriteData(plr, key, tCopy)
 end

@@ -55,12 +55,12 @@ function SpinService:KnitStart()
     self.Sections = {
         -- Types: Normal (edits datastore), Custom (make custom function to reward)
         -- must add up to 100%
-        {Reward = "UGC Item", Percent = 0.01, Type = "Custom"},
-        {Reward = "Cartoony Boink Hammer", Percent = 0.05, Type = "Custom"},
-        {Reward = "100 Deaths", Percent = 0.1, Type = "Normal", StatIncrease = {"Deaths", 100}},
-        {Reward = "50 Deaths", Percent = 0.15, Type = "Normal", StatIncrease = {"Deaths", 50}},
-        {Reward = "30 Deaths", Percent = 0.29, Type = "Normal", StatIncrease = {"Deaths", 30}},
-        {Reward = "10 Deaths", Percent = 0.40, Type = "Normal", StatIncrease = {"Deaths", 10}}
+        {Reward = "UGC Item", Percent = 0.01, Type = "Custom", Image = "http://www.roblox.com/asset/?id=15151374676"},
+        {Reward = "Cartoony Boink Hammer", Percent = 0.05, Type = "Custom", Image = "rbxassetid://15525830232"},
+        {Reward = "100 Deaths", Percent = 0.1, Type = "Normal", StatIncrease = {"Deaths", 100}, Image = "rbxassetid://15525753578"},
+        {Reward = "50 Deaths", Percent = 0.15, Type = "Normal", StatIncrease = {"Deaths", 50}, Image = "rbxassetid://15525751671"},
+        {Reward = "30 Deaths", Percent = 0.29, Type = "Normal", StatIncrease = {"Deaths", 30}, Image = "rbxassetid://15525750270"},
+        {Reward = "10 Deaths", Percent = 0.40, Type = "Normal", StatIncrease = {"Deaths", 10}, Image = "rbxassetid://15525748283"}
     }
 
     self.UnclaimedRewards = {}

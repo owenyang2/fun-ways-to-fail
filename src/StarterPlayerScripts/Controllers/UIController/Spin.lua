@@ -13,7 +13,9 @@ local TableUtil = require(RepStorage.Packages.TableUtil)
 function Spin:SetupWinSections()
     for i, data in ipairs(self.Sections) do
         local sectionFrame = self.spinUI.SpinWheel["Section" .. tostring(i)]
-        sectionFrame.Percent.Text = tostring(data.Percent * 100) .. "%"
+        print(i, data)
+        sectionFrame.Percent.Text = tostring(math.round(data.Percent * 100)) .. "%"
+        sectionFrame.Image = data.Image
     end
 end
 
@@ -26,15 +28,24 @@ end
 
 function Spin:PlaySpinAnim(rewardNum)
     -- to get calculations to return to the beginning
-    -- (initialSpeed - stopSpeed) * 2 = total steps
+    -- (initialSpeed - stopSpeed) * step = total steps
     -- total steps / 360 = total rotations (should be whole number to end at start pos)
     local initialSpeed = 73
-    local speedDecrease = 0.5
+    local speedDecrease = 1
     local stopSpeed = 1
     local step = 10
 
+    -- set to zero before doing target calculations
+    if self.spinUI.SpinWheel.Rotation ~= 0 then
+        local timeToSetZero = ((360 - self.spinUI.SpinWheel.Rotation) / step) * (1 / initialSpeed) -- time it would take to get to setup if it were the fastest
+        local setToZero = TweenService:Create(self.spinUI.SpinWheel, TweenInfo.new(timeToSetZero, Enum.EasingStyle.Linear), {Rotation = 360})
+        setToZero:Play()
+        setToZero.Completed:Wait()
+        self:FixRot()    
+    end
+
     -- setup start position, each section is 60 degrees
-    local setupRot = self.spinUI.SpinWheel.Rotation + (rewardNum - 1) * 60 + math.random(0, 59) -- random position within the section
+    local setupRot = (rewardNum - 1) * 60 + math.random(0, 59)-- random position within the section
 
     local timeToComplete = ((setupRot - self.spinUI.SpinWheel.Rotation) / step) * (1 / initialSpeed) -- time it would take to get to setup if it were the fastest
     local setupTween = TweenService:Create(self.spinUI.SpinWheel, TweenInfo.new(timeToComplete, Enum.EasingStyle.Linear), {Rotation = setupRot})
@@ -49,11 +60,11 @@ function Spin:PlaySpinAnim(rewardNum)
     
         tween:Play()
         tween.Completed:Wait()
-
-        self:FixRot()
         
         currSpeed -= speedDecrease
     end
+
+    self:FixRot()
 end
 
 function Spin:SpinWheel()
