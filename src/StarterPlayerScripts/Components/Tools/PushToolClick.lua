@@ -1,11 +1,8 @@
--- setup remote communications tracking keybinds to get out
+--[[ -- old unused click pushing tool
 local RepStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local Knit = require(RepStorage.Packages.Knit)
 local Component = require(RepStorage.Packages.Component)
-local MachineFuncs = require(RepStorage.Common.MachineFunctions)
 local Trove = require(RepStorage.Packages.Trove)
 
 local PushTool = Component.new {
@@ -42,3 +39,4 @@ function PushTool:Start()
 end
 
 return PushTool
+--]]

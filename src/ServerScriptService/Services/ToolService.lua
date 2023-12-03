@@ -24,7 +24,7 @@ function ToolService:CheckHoldingToolWithTag(plr : Player, tag : string)
     return
 end
 
-function ToolService:PushPlayer(target: Player, dir : Vector3)
+function ToolService:PushPlayer(target: Player, tool : string,  dir : Vector3)
     -- ragdoll target player
     local ragdoll = Ragdoll.GlobalRagdolls[target]
 
@@ -41,7 +41,7 @@ function ToolService:PushPlayer(target: Player, dir : Vector3)
         local tempVelo = Instance.new("LinearVelocity")
         tempVelo.MaxForce = math.huge
         tempVelo.Attachment0 = target.Character.Head.FaceCenterAttachment
-        tempVelo.VectorVelocity = dir * self.Settings.FallForce
+        tempVelo.VectorVelocity = dir * self.Settings[tool].FallForce
         tempVelo.Name = "PushForce"
         tempVelo.Parent = target.Character.HumanoidRootPart
 
@@ -50,37 +50,66 @@ function ToolService:PushPlayer(target: Player, dir : Vector3)
         tempVelo:Destroy()
     end)
 
-    task.wait(self.Settings.RagdollTime)
+    task.wait(self.Settings[tool].RagdollTime)
 
     ragdoll:EditCanRagdoll(true)
     ragdoll:Toggle(false)
 end
 
-function ToolService.Client:PushTargetHitbox(plr : Player)
-    local toolSettings = self.Server.Settings.Push
-    local tool = self.Server:CheckHoldingToolWithTag(plr, self:ToolToTag("Push"))
+function ToolService:GetPushToolParts(plr) -- push tool :GetPartsInPart
+    local partsR = game.Workspace:GetPartsInPart(plr.Character.RightHand, MachineFuncs.GetHitboxParams())
+    local partsL = game.Workspace:GetPartsInPart(plr.Character.LeftHand, MachineFuncs.GetHitboxParams())
 
-    -- check if can push
+    return TableUtil.Extend(partsR, partsL)
+end
+
+function ToolService:GetHammerParts(tool) -- hammer tool :GetPartsInPart
+    return game.Workspace:GetPartsInPart(tool.Handle, MachineFuncs.GetHitboxParams())
+end
+
+function ToolService.Client:PushToolActivated(plr : Player, toolType : string)
+    print("activate")
+    local validPushingTools = {
+        "Push",
+        "BoinkHammer",
+        "OPHammer"
+    }
+
+    if not table.find(validPushingTools, toolType) then
+        return
+    end
+
+    local toolSettings = self.Server.Settings[toolType]
+    local tool = self.Server:CheckHoldingToolWithTag(plr, self.Server:ToolToTag(toolType))
+
+    -- check if can use
     if not plr.Character or not tool then return end
 
     -- check cooldown
-    if self.Server.LastPush[plr] ~= nil and os.time() - self.Server.LastPush[plr] < toolSettings.Cooldown then return end
+    if self.Server.ToolDB[toolType][plr] ~= nil and os.time() - self.Server.ToolDB[toolType][plr] < toolSettings.Cooldown then return end
     
-    self.Server.LastPush[plr] = os.time()
-    --self.Server.BasicService:PlayAnim(plr, self.Server.Anims.PushAnimID, {Looped = false})
-    self.Server.BasicService:PlayAnim(plr, self.Server.Anims.PushAnimID)
+    self.Server.ToolDB[toolType][plr] = os.time()
+    self.Server.BasicService:PlayAnim(plr, self.Server.Anims[toolType])
 
     local tempTrove = Trove.new()
     tempTrove:AttachToInstance(tool)
     tempTrove:Connect(RunService.Heartbeat, function(dt)
         if not plr.Character then return end
     
-        local partsR = game.Workspace:GetPartsInPart(plr.Character.RightHand, MachineFuncs.GetHitboxParams())
-        local partsL = game.Workspace:GetPartsInPart(plr.Character.LeftHand, MachineFuncs.GetHitboxParams())
-    
+        local parts = {}
+
+        if toolType == "Push" then
+            parts = self.Server:GetPushToolParts(plr)
+        elseif toolType == "BoinkHammer" or toolType == "OPHammer" then
+            parts = self.Server:GetHammerParts(tool)
+        else
+            warn("Push Hitbox for " .. toolType .. " was not setup correctly!")
+            return
+        end
+        
         local donePlrs = {}
     
-        for _, part in ipairs(TableUtil.Extend(partsR, partsL)) do
+        for _, part in ipairs(parts) do
             print(part)
             if not part then continue end
                 
@@ -89,42 +118,7 @@ function ToolService.Client:PushTargetHitbox(plr : Player)
             if not targetPlr or targetPlr == plr then continue end
     
             table.insert(donePlrs, targetPlr)
-            self.Server:PushPlayer(targetPlr, plr.Character.HumanoidRootPart.CFrame.LookVector.Unit)
-        end
-    end)
-
-    task.wait(toolSettings.Length)
-    tempTrove:Destroy()
-end
-
-function ToolService.Client:SwingBoinkHammer(plr : Player)
-    local toolSettings = self.Server.Settings.BoinkHammer
-    local tool = self.Server:CheckHoldingToolWithTag(plr, self:ToolToTag("BoinkHammer"))
-
-    if not plr.Character or not tool then return end
-    if self.Server.LastSwingBoink[plr] ~= nil and os.time() - self.Server.LastSwingBoink[plr] < toolSettings.Cooldown then return end
-
-    self.Server.LastSwingBoink[plr] = os.time()
-    self.Server.BasicService:PlayAnim(plr, self.Server.Anims.SwingAnimID)
-
-    local tempTrove = Trove.new()
-    tempTrove:AttachToInstance(tool)
-    tempTrove:Connect(RunService.Heartbeat, function(dt)
-        if not plr.Character or not tool:FindFirstChild("Handle") then return end
-    
-        local parts = game.Workspace:GetPartsInPart(tool.Handle, MachineFuncs.GetHitboxParams())
-    
-        local donePlrs = {}
-    
-        for _, part in ipairs(parts) do
-            if not part then continue end
-                
-            local targetPlr = game.Players:GetPlayerFromCharacter(part:FindFirstAncestorOfClass("Model"))
-    
-            if not targetPlr or targetPlr == plr then continue end
-    
-            table.insert(donePlrs, targetPlr)
-            self.Server:PushPlayer(targetPlr, plr.Character.HumanoidRootPart.CFrame.LookVector.Unit)
+            self.Server:PushPlayer(targetPlr, toolType, plr.Character.HumanoidRootPart.CFrame.LookVector.Unit)
         end
     end)
 
@@ -135,7 +129,8 @@ end
 function ToolService:ToolToTag(tool)
     local toolToTag = {
         Push = "PushToolHitbox",
-        BoinkHammer = "BoinkHammer"
+        BoinkHammer = "BoinkHammer",
+        OPHammer = "OPHammer"
     }
 
     return toolToTag[tool]
@@ -146,28 +141,40 @@ function ToolService:KnitStart()
     self.BasicService = Knit.GetService("BasicService")
 
     self.Anims = {
-        PushAnimID = "rbxassetid://15186940808",
-        SwingAnimID = "rbxassetid://15393389805"
+        Push = "rbxassetid://15186940808",
+        BoinkHammer = "rbxassetid://15393389805",
+        OPHammer = "rbxassetid://15393389805"
     }
 
     self.Settings = {
         Push = {
-            Cooldown = 3,
-            RagdollTime = 3,
+            Cooldown = 1,
+            RagdollTime = 1,
             FallForce = 15,
-            Length = MachineFuncs.GetAnimLength(self.Anims.PushAnimID) + 1    
+            Length = MachineFuncs.GetAnimLength(self.Anims.Push) + 1,
+            HitboxParts = {}
         },
 
         BoinkHammer = {
+            Cooldown = 3,
+            RagdollTime = 2,
+            FallForce = 30,
+            Length = MachineFuncs.GetAnimLength(self.Anims.BoinkHammer) + 1    
+        },
+
+        OPHammer = {
             Cooldown = 5,
-            RagdollTime = 5,
-            FallForce = 50,
-            Length = MachineFuncs.GetAnimLength(self.Anims.SwingAnimID) + 1    
+            RagdollTime = 4,
+            FallForce = 60,
+            Length = MachineFuncs.GetAnimLength(self.Anims.OPHammer) + 1    
         }
     }
 
-    self.LastPush = {} -- keeps track of each player's last push
-    self.LastSwingBoink = {} -- keeps track of each player's last swing (boink hammer)
+    self.ToolDB = { -- keeps track of each player's last use
+        Push = {},
+        BoinkHammer = {},
+        OPHammer = {}
+    }
 end
 
 return ToolService

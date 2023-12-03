@@ -1,11 +1,7 @@
--- setup remote communications tracking keybinds to get out
 local RepStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
 local Knit = require(RepStorage.Packages.Knit)
 local Component = require(RepStorage.Packages.Component)
-local MachineFuncs = require(RepStorage.Common.MachineFunctions)
 local Trove = require(RepStorage.Packages.Trove)
 
 local PushTool = Component.new {
@@ -14,8 +10,9 @@ local PushTool = Component.new {
 
 function PushTool:SetupConnections()
     self.Instance.Activated:Connect(function()
+        print("pushed")
         if self.Player.Character then
-            self.ToolService:PushTargetHitbox()
+            self.ToolService:PushToolActivated("Push")
         end
     end)
 end

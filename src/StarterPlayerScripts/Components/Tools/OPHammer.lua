@@ -8,23 +8,23 @@ local Component = require(RepStorage.Packages.Component)
 local MachineFuncs = require(RepStorage.Common.MachineFunctions)
 local Trove = require(RepStorage.Packages.Trove)
 
-local BoinkHammer = Component.new {
-    Tag = "BoinkHammer"
+local OPHammer = Component.new {
+    Tag = "OPHammer"
 }
 
-function BoinkHammer:SetupConnections()
+function OPHammer:SetupConnections()
     self.Instance.Activated:Connect(function()
         if self.Player.Character then
-            self.ToolService:PushToolActivated("BoinkHammer")
+            self.ToolService:PushToolActivated("OPHammer")
         end
     end)
 end
 
-function BoinkHammer:Stop()
+function OPHammer:Stop()
     self._trove:Destroy()
 end
 
-function BoinkHammer:Start()
+function OPHammer:Start()
     self.Player = game.Players.LocalPlayer
     self._trove = Trove.new()
 
@@ -34,4 +34,4 @@ function BoinkHammer:Start()
     self:SetupConnections()
 end
 
-return BoinkHammer
+return OPHammer
