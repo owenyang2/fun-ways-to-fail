@@ -110,7 +110,6 @@ function ToolService.Client:PushToolActivated(plr : Player, toolType : string)
         local donePlrs = {}
     
         for _, part in ipairs(parts) do
-            print(part)
             if not part then continue end
                 
             local targetPlr = game.Players:GetPlayerFromCharacter(part:FindFirstAncestorOfClass("Model"))

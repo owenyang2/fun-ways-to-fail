@@ -10,7 +10,6 @@ local PushTool = Component.new {
 
 function PushTool:SetupConnections()
     self.Instance.Activated:Connect(function()
-        print("pushed")
         if self.Player.Character then
             self.ToolService:PushToolActivated("Push")
         end
