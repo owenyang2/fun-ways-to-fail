@@ -81,7 +81,7 @@ function Spin:SpinWheel()
 end
 
 function Spin:SetupAnims()
-    self.UIFuncs.ApplyButtonClickAnim(self.spinUI.Close)
+    --self.UIFuncs.ApplyButtonClickAnim(self.spinUI.Close)
 
     local animatedButtons = {
         self.spinUI.Buy15,

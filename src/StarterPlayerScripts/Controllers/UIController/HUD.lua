@@ -49,7 +49,7 @@ end
 
 function HUD:SetupAnims()
     for _, button in ipairs(self.hudUI:GetDescendants()) do
-        if button:IsA("ImageButton") or button:IsA("TextButton") then
+        if (button:IsA("ImageButton") or button:IsA("TextButton")) then
             self.UIFuncs.ApplyButtonClickAnim(button)
         end
     end

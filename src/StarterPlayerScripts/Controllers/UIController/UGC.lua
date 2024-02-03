@@ -57,7 +57,7 @@ function UGC:SetupUgcUI()
 end
 
 function UGC:SetupAnims()
-    self.UIFuncs.ApplyButtonClickAnim(self.ugcUI.Frame.Close)
+    --self.UIFuncs.ApplyButtonClickAnim(self.ugcUI.Frame.Close)
 end
 
 function UGC:Start()

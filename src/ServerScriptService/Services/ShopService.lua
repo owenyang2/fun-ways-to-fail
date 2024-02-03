@@ -1,3 +1,5 @@
+-- this whole service is very messily coded, find a better way to improve this in the future
+
 local RepStorage = game:GetService("ReplicatedStorage")
 local MarketplaceService = game:GetService("MarketplaceService")
 
@@ -62,6 +64,18 @@ function ShopService:SetupGamepassList(ids)
             warn("No corresponding key name assigned to gamepass id: " .. tostring(id))
         end
     end
+end
+
+function ShopService.Client:GetGamepassInfoFromName(plr, name)
+    local id = self.Server.gpNameToID[name]
+
+    for _, info in ipairs(self.Server.GamepassInfo) do
+        if info.TargetId == id then -- found
+            return info
+        end
+    end
+
+    warn("Could not find matching gamepass info from name \"" .. name .. "\"")
 end
 
 function ShopService:KnitStart()
