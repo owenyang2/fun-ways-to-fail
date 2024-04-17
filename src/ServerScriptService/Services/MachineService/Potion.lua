@@ -38,7 +38,7 @@ function Potion:Drink(plr)
         plr.Character.Humanoid.WalkSpeed = 40
         
         task.spawn(function()
-            while plr.Character.Humanoid.Health > 0 do
+            while plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0 do
                 plr.Character.Humanoid.Health -= 1
                 print(plr.Character.Humanoid.Health)
                 task.wait(0.1)
