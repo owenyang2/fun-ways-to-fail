@@ -1,2 +1,2 @@
-# fun ways to die
+# fun ways to fail
  
